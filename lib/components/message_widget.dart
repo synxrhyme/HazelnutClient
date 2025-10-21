@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hazelnut/main.dart';
 import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/message_provider.dart';
 import 'package:hazelnut/utils/models.dart';
 
-class MessageWidget extends StatefulWidget {
+class MessageWidget extends StatelessWidget {
   final MessageModel message;
 
   MessageWidget({
@@ -13,42 +12,10 @@ class MessageWidget extends StatefulWidget {
   });
 
   @override
-  State<MessageWidget> createState() => _MessageWidgetState();
-}
-
-class _MessageWidgetState extends State<MessageWidget> {
-  Color color = Colors.grey.shade700;
-  String userId = "";
-
-  @override
-  void initState() {
-    super.initState();
-    loadVars();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    loadVars();
-  }
-
-  void loadVars() async {
-    final String uId = await secureStorage.getToken("userId");
-
-    setState(() {
-      color = getAccentFromString(widget.message.senderId);
-      userId = uId;
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context).extension<CustomColors>()!;
+    final theme = Theme.of(context).extension<CustomColors>()!;
+    final userId = MessageProvider().userId ?? "";
+    final color = getAccentFromString(message.senderName);
 
     return Container(
       width: double.infinity,
@@ -64,7 +31,7 @@ class _MessageWidgetState extends State<MessageWidget> {
             radius: 18,
             backgroundColor: theme.background.shade400,
             child: Text(
-              widget.message.senderName[0].toUpperCase(),
+              message.senderName[0].toUpperCase(),
               style: TextStyle(
                 fontSize: 19,
                 color: color,
@@ -84,7 +51,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                         "${widget.message.senderName} (Du)",
+                         "${message.senderName}${message.senderId == userId ? " (Du)" : ""}",
                           style: TextStyle(
                             color: color.withAlpha(200),
                             fontFamily: "Space Grotesk",
@@ -95,7 +62,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                         ),
                         SizedBox(height: 3),
                         Text(
-                          widget.message.text,
+                          message.text,
                           softWrap: true,
                           style: TextStyle(
                             color: Theme.of(context).primaryColor.withAlpha(230),
@@ -108,7 +75,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                     ),
                   ),
 
-                  if (widget.message.pending == 1)
+                  if (message.pending == 1)
                   Icon(
                     Icons.pending_rounded,
                     color: Colors.grey.shade700,

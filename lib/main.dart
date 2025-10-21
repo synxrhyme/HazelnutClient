@@ -1,4 +1,5 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:hazelnut/utils/life_cycle_handler.dart";
 import "package:hazelnut/utils/main_init.dart";
 import "package:hazelnut/utils/navigation_mode_helper.dart";
 import "package:hazelnut/utils/secure_storage_service.dart";
@@ -11,8 +12,8 @@ import "package:hazelnut/utils/preferences_utils.dart";
 import "package:hazelnut/pages/home_page.dart";
 import "package:hazelnut/pages/setup_page.dart";
 
-final EventProvider eventProviderGlobal         = EventProvider();
-final SecureStorageService secureStorage        = SecureStorageService();
+final EventProvider eventProviderGlobal       = EventProvider();
+final SecureStorageService secureStorage      = SecureStorageService();
 
 final GlobalKey<NavigatorState> navigatorKey  = GlobalKey<NavigatorState>();
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -26,9 +27,7 @@ Future<void> main() async {
   await initFirebase(secureStorage);
   await initServices(secureStorage);
 
-  runApp(
-    ProviderScope(child: const HazelnutApp()),
-  );
+  runApp(ProviderScope(child: MyAppLifecycleHandler(child: const HazelnutApp())));
 }
 
 class HazelnutApp extends ConsumerWidget {
@@ -62,7 +61,7 @@ class HazelnutApp extends ConsumerWidget {
               if (loadingService.isLoading)
                 Builder(
                   builder: (context) {
-                    var theme = Theme.of(context).extension<CustomColors>()!;
+                    final theme = Theme.of(context).extension<CustomColors>()!;
                     return Container(
                       color: Colors.black54,
                       child: Center(

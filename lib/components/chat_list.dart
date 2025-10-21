@@ -12,13 +12,26 @@ class ChatList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = ref.watch(messageProvider).messagesForChat(chatId).reversed.toList();
 
-    return ListView.builder(
-      reverse: true,
-      itemCount: messages.length,
-      itemBuilder: (context, index) {
-        final MessageModel msg = messages[index];
-        return MessageWidget(message: msg);
-      },
+    return Container(
+      color: Colors.black,
+      child: messages.isEmpty ? Center(
+        child: Text(
+          "Keine Nachrichten",
+          style: TextStyle(
+            color: Theme.of(context).primaryColor.withAlpha(130),
+            fontSize: 19,
+            fontFamily: "Space Grotesk",
+            fontWeight: FontWeight.normal
+          ),
+        ),
+      ) : ListView.builder(
+        reverse: true,
+        itemCount: messages.length,
+        itemBuilder: (context, index) {
+          final MessageModel msg = messages[index];
+          return MessageWidget(message: msg);
+        },
+      ),
     );
   }
 }

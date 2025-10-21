@@ -13,12 +13,10 @@ import 'package:hazelnut/utils/snackbar_utils.dart';
 class WebSocketService {
   late WidgetRef _ref;
 
-  // --- Singleton Setup ---
   WebSocketService._internal();
   static final WebSocketService _instance = WebSocketService._internal();
   factory WebSocketService() => _instance;
-
-  // --- State ---
+  
   WebSocket? _socket;
   String? _url;
 

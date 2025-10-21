@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:hazelnut/components/navbar_item.dart';
 // ignore: unused_import
 import 'package:hazelnut/components/premium_background.dart';
+import 'package:hazelnut/main.dart';
+import 'package:hazelnut/utils/message_provider.dart';
 
 import "../theme.dart";
 
@@ -24,6 +26,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
+    MessageProvider().loadUserId(secureStorage);
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(

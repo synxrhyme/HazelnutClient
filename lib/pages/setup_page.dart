@@ -51,7 +51,7 @@ class _SetupPage extends State<SetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context).extension<CustomColors>()!;
+    final theme = Theme.of(context).extension<CustomColors>()!;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hazelnut/components/chat_list.dart';
 import 'package:hazelnut/utils/database_service.dart';
+import 'package:hazelnut/utils/local_notifications.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:hazelnut/utils/secure_storage_service.dart';
 import 'package:hazelnut/theme.dart';
@@ -25,7 +26,10 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async => await MessageProvider().loadAll());
+    Future.microtask(() async {
+      await MessageProvider().loadAll();
+      ChatNotifications().cancelChatNotifications(widget.chatId, true);
+    });
   }
 
   @override
@@ -144,6 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                     GestureDetector(
                       onTap: () {
+                        ChatNotifications().setCurrentChatId(null);
                         Navigator.of(context).pop();
                       },
                       child: Container(

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +9,44 @@ import 'package:hazelnut/pages/home_page.dart';
 import 'package:hazelnut/utils/chat_provider.dart';
 import 'package:hazelnut/utils/database_service.dart';
 import 'package:hazelnut/utils/loading_provider.dart';
+import 'package:hazelnut/utils/local_notifications.dart';
 import 'package:hazelnut/utils/message_provider.dart';
 import 'package:hazelnut/utils/models.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:hazelnut/utils/secure_storage_service.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
 import 'package:hazelnut/utils/websocket_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+@pragma('vm:entry-point')
+Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const initSettings = InitializationSettings(android: androidInit);
+  await flutterLocalNotificationsPlugin.initialize(initSettings);
+
+  final prefs = await SharedPreferences.getInstance();
+  final chatId = int.tryParse(message.data["chatId"].toString()) ?? 0;
+  final key = "chat_$chatId";
+  final prevCount = prefs.getInt(key) ?? 0;
+  final newCount = prevCount + 1;
+  await prefs.setInt(key, newCount);
+
+  await flutterLocalNotificationsPlugin.show(
+    chatId,
+    message.data["title"] ?? "Neue Nachricht",
+    "Du hast $newCount neue Nachricht${newCount > 1 ? "en" : ""} in ${message.data["chatName"]}",
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'default_channel_id',
+        'Standard',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: '@drawable/notification_icon',
+      ),
+    ),
+  );
+}
 
 Future<void> initFirebase(SecureStorageService secureStorage) async {
   await Firebase.initializeApp();
@@ -39,37 +70,12 @@ Future<void> initFirebase(SecureStorageService secureStorage) async {
       await secureStorage.saveToken("fcmToken", fcmToken);
   }
 
-  final FlutterLocalNotificationsPlugin localNotifications = FlutterLocalNotificationsPlugin();
-  const AndroidInitializationSettings androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-  const InitializationSettings initSettings = InitializationSettings(android: androidInit);
-  await localNotifications.initialize(initSettings);
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint("Message received: ${message.data}");
-    final data = message.data;
-    debugPrint("time: ${data["sentTimestamp"]}");
-    //DateTime sentTimestamp = DateTime.parse();
-
-    localNotifications.show(
-      data.hashCode,
-      data["title"],
-      data["body"],
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          'default_channel_id',
-          'Standard',
-          importance: Importance.high,
-          priority: Priority.high,
-          icon: '@drawable/notification_icon',
-          //when: sentTimestamp.millisecondsSinceEpoch,
-        ),
-      ),
-    );
-  });
+  FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
 }
 
 Future<void> initServices(SecureStorageService secureStorage) async {
   await DatabaseService().init();
+  await ChatNotifications().init();
 
   WebSocketService().setUrl("wss://hazelnut.synxrhyme.com/ws/");
   await WebSocketService().connect();

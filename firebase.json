@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"hazelnut-messenger","appId":"1:383875206920:android:b8da0e14ef8311233166bd","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"hazelnut-messenger","configurations":{"android":"1:383875206920:android:b8da0e14ef8311233166bd","ios":"1:383875206920:ios:1e1e3d9d38c1a5a23166bd","macos":"1:383875206920:ios:1e1e3d9d38c1a5a23166bd","web":"1:383875206920:web:dce6cad0aaaaae8f3166bd","windows":"1:383875206920:web:fd2f41ac6c2a99b13166bd"}}}}}}
+{
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "hazelnut-messenger",
+                    "appId": "1:383875206920:android:b8da0e14ef8311233166bd",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "hazelnut-messenger",
+                    "configurations": {
+                        "android": "1:383875206920:android:b8da0e14ef8311233166bd",
+                        "ios": "1:383875206920:ios:1e1e3d9d38c1a5a23166bd",
+                        "macos": "1:383875206920:ios:1e1e3d9d38c1a5a23166bd",
+                        "web": "1:383875206920:web:dce6cad0aaaaae8f3166bd",
+                        "windows": "1:383875206920:web:fd2f41ac6c2a99b13166bd"
+                    }
+                }
+            }
+        }
+    }
+}
