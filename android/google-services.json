@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "383875206920",
+    "project_id": "hazelnut-messenger",
+    "storage_bucket": "hazelnut-messenger.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383875206920:android:b8da0e14ef8311233166bd",
+        "android_client_info": {
+          "package_name": "com.example.hazelnut"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfiX71mlNDkglS0FAInyBb3SWLH5WNktU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
