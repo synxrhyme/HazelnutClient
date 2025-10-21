@@ -128,6 +128,10 @@ class _ChatScreenState extends State<ChatScreen> {
               Container(
                 color: theme.background.shade600,
                 child: SafeArea(
+                  top: true,
+                  left: false,
+                  right: false,
+                  bottom: true,
                   child: Container(),
                 ),
               ),

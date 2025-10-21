@@ -43,6 +43,10 @@ class _MainPage1State extends ConsumerState<MainPage1> {
         Container(
           color: theme.background.shade700,
           child: SafeArea(
+            top: true,
+            left: false,
+            right: false,
+            bottom: true,
             child: Container(),
           ),
         ),

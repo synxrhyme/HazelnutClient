@@ -27,6 +27,10 @@ class _MainPage3State extends State<MainPage3> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      top: true,
+      left: false,
+      right: false,
+      bottom: true,
       child: Column(
         children: [
           ElevatedButton(

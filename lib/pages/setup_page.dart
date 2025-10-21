@@ -60,6 +60,10 @@ class _SetupPage extends State<SetupPage> {
       body: Container(
         color: appBarList[_index],
         child: SafeArea(
+          top: true,
+          left: false,
+          right: false,
+          bottom: true,
           child: Stack(
             children: [
               PageView(

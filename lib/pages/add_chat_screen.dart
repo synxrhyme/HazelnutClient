@@ -51,6 +51,10 @@ class _AddChatScreenState extends State<AddChatScreen> {
       extendBodyBehindAppBar: true,
       extendBody: true,
       body: SafeArea(
+        top: true,
+        left: false,
+        right: false,
+        bottom: true,
         child: Container(
           color: theme.background.shade700,
           child: Align(
