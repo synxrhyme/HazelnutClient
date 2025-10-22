@@ -15,8 +15,6 @@ class ChatNotifications {
   bool _initialized = false;
   int? currentChatId;
 
-  final Map<int, int> _newMessageCount = {};
-
   Future<void> init() async {
     if (_initialized) return;
 
@@ -75,12 +73,11 @@ class ChatNotifications {
     }
 
     final prefs = await SharedPreferences.getInstance();
+    prefs.reload();
     final key = "chat_$chatId";
     final prevCount = prefs.getInt(key) ?? 0;
     final newCount = prevCount + 1;
     await prefs.setInt(key, newCount);
-
-    _newMessageCount[chatId] = newCount;
 
     cancelChatNotifications(chatId, false);
 
@@ -100,27 +97,16 @@ class ChatNotifications {
     );
   }
 
-  Future<void> updateCache(int chatId) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
-    final key = "chat_$chatId";
-    final count = prefs.getInt(key) ?? 0;
-    _newMessageCount[chatId] = count;
-  }
-
   Future<void> cancelChatNotifications(int chatId, bool resetCounter) async {
     await _localNotifications.cancel(chatId);
     if (!resetCounter) return;
     
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt("chat_$chatId", 0);
-
-    _newMessageCount[chatId] = 0;
   }
 
   Future<void> cancelAllNotifications() async {
     await _localNotifications.cancelAll();
-    _newMessageCount.clear();
   }
 
   void setCurrentChatId(int? chatId) {
