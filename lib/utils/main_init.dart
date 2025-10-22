@@ -20,6 +20,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
+  if (message.data["chatName"] == null || message.data["chatId"] == null) return;
+  
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
   const initSettings = InitializationSettings(android: androidInit);
