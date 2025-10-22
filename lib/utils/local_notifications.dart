@@ -64,6 +64,8 @@ class ChatNotifications {
       return;
     }
 
+    if (data["chatName"] == null || data["chatId"] == null) return;
+
     final chatId = int.tryParse(data["chatId"].toString());
     if (chatId == null) return;
 
