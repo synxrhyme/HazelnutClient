@@ -1,5 +1,6 @@
 import "package:flutter/services.dart";
 import "package:hazelnut/main.dart";
+import "package:hazelnut/utils/navigation_mode_helper.dart";
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter/material.dart';
 
@@ -63,7 +64,7 @@ class _SetupPage extends State<SetupPage> {
           top: true,
           left: false,
           right: false,
-          bottom: true,
+          bottom: NavigationModeHelper().navigationMode == "gesture" ? false : true,
           child: Stack(
             children: [
               PageView(

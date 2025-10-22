@@ -14,11 +14,12 @@ void signout() async {
   secureStorage.deleteToken("authToken");
   secureStorage.deleteToken("refreshToken");
 
-  await setBool("setupComplete", false);
+  await PreferencesUtils().setBool("setupComplete", false);
 
   navigatorKey.currentState?.push(
     PageRouteBuilder(
       transitionDuration: Duration(milliseconds: 500),
+      settings: RouteSettings(name: "setupPage"),
       pageBuilder: (context, animation, secondaryAnimation) => SetupPage(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);

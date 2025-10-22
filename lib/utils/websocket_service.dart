@@ -114,7 +114,7 @@ class WebSocketService {
         final String userId = await secureStorage.getToken("userId");
 
         if (data["header"] == "session_key_response" && data["status"] == "success") {
-          if (await getBool("setupComplete") == false) {
+          if (await PreferencesUtils().getBool("setupComplete") == false) {
             setReady(true);
             debugPrint("[WebSocket] Setup not complete, skipping auth. -- ready");
             return;
@@ -245,7 +245,7 @@ class WebSocketService {
       return;
     }
 
-    else if (_connected && !_ready && await getBool("setupComplete") == false) {
+    else if (_connected && !_ready && await PreferencesUtils().getBool("setupComplete") == false) {
       debugPrint('[WebSocket] Not setup, skipping auth.');
     }
 

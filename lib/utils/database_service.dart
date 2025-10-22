@@ -70,8 +70,8 @@ class DatabaseService {
   }
 
   Future<void> insertMessageIntoDb(MessageModel message) async {
-    final int lastUId = await getInt("lastUId");
-    await setInt("lastUId", lastUId + 1);
+    final int lastUId = await PreferencesUtils().getInt("lastUId") ?? 0;
+    await PreferencesUtils().setInt("lastUId", lastUId + 1);
     await messageDb.insert('messages', message.exportJson());
   }
 

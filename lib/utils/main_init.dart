@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -16,24 +17,31 @@ import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:hazelnut/utils/secure_storage_service.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
 import 'package:hazelnut/utils/websocket_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
   if (message.data["chatName"] == null || message.data["chatId"] == null) return;
+  debugPrint("handling background");
+
+  final int chatId = int.parse(message.data["chatId"]);
   
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
   const initSettings = InitializationSettings(android: androidInit);
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-  final prefs = await SharedPreferences.getInstance();
-  prefs.reload();
-  final chatId = int.tryParse(message.data["chatId"].toString()) ?? 0;
-  final key = "chat_$chatId";
-  final prevCount = prefs.getInt(key) ?? 0;
-  final newCount = prevCount + 1;
-  await prefs.setInt(key, newCount);
+  await PreferencesUtils().init();
+  await PreferencesUtils().reload();
+  final String key = "chat_$chatId";
+
+  final int? prevCount = await PreferencesUtils().getInt(key);
+  if (prevCount == null) {
+    debugPrint("First notification for chat $chatId, setting count to 1");
+    return;
+  }
+
+  final int newCount = prevCount + 1;
+  await PreferencesUtils().setInt(key, newCount);
 
   await flutterLocalNotificationsPlugin.show(
     chatId,
@@ -52,32 +60,30 @@ Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
 }
 
 Future<void> initFirebase(SecureStorageService secureStorage) async {
-  await Firebase.initializeApp();
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  await messaging.subscribeToTopic("HazelnutMessenger");
+  unawaited(Firebase.initializeApp().then((_) async {
+    final FirebaseMessaging messaging = FirebaseMessaging.instance;
+    messaging.subscribeToTopic("HazelnutMessenger");
 
-  final String fcmToken_ = await secureStorage.getToken("fcmToken");
+    final String savedToken = await secureStorage.getToken("fcmToken");
 
-  if (fcmToken_ == "") {
+    if (savedToken.isEmpty) {
       await messaging.requestPermission(
         alert: true,
-        announcement: false,
         badge: true,
-        carPlay: false,
-        criticalAlert: false,
-        provisional: false,
         sound: true,
       );
 
       final String fcmToken = await messaging.getToken() ?? "";
-      await secureStorage.saveToken("fcmToken", fcmToken);
-  }
+      if (fcmToken.isNotEmpty) {
+        await secureStorage.saveToken("fcmToken", fcmToken);
+      }
+    }
 
-  FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
+    FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
+  }));
 }
 
-Future<void> initServices(SecureStorageService secureStorage) async {
-  await DatabaseService().init();
+Future<void> initFullServices(SecureStorageService secureStorage) async {
   await ChatNotifications().init();
 
   WebSocketService().setUrl("wss://hazelnut.synxrhyme.com/ws/");
@@ -99,11 +105,12 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
           await secureStorage.saveToken("authToken",    data["body"]["authToken"].toString());
           await secureStorage.saveToken("refreshToken", data["body"]["refreshToken"].toString());
 
-          await setBool("setupComplete", true);
+          await PreferencesUtils().setBool("setupComplete", true);
 
           navigatorKey.currentState?.push(
             PageRouteBuilder(
               transitionDuration: Duration(milliseconds: 500),
+              settings: RouteSettings(name: "homePage"),
               pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
               transitionsBuilder: (context, animation, secondaryAnimation, child) {
                 const begin = Offset(1.0, 0.0); // Start rechts außerhalb des Bildschirms
@@ -188,7 +195,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
     case "broadcast_message": {
       final String now = DateTime.now().toUtc().toIso8601String();
 
-      data["body"]["uId"] = await getInt("lastUId");
+      data["body"]["uId"] = await PreferencesUtils().getInt("lastUId") ?? 0;
       data["body"]["pending"] = 0;
       data["body"]["receivedTimestamp"] = now;
 

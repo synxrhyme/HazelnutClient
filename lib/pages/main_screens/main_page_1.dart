@@ -6,6 +6,7 @@ import 'package:hazelnut/pages/add_chat_screen.dart';
 import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/loading_provider.dart';
 import 'package:hazelnut/utils/models.dart';
+import 'package:hazelnut/utils/navigation_mode_helper.dart';
 
 class MainPage1 extends ConsumerStatefulWidget {
   const MainPage1({super.key});
@@ -46,7 +47,7 @@ class _MainPage1State extends ConsumerState<MainPage1> {
             top: true,
             left: false,
             right: false,
-            bottom: true,
+            bottom: NavigationModeHelper().navigationMode == "gesture" ? false : true,
             child: Container(),
           ),
         ),

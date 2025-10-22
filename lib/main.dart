@@ -1,7 +1,8 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:hazelnut/utils/database_service.dart";
 import "package:hazelnut/utils/life_cycle_handler.dart";
 import "package:hazelnut/utils/main_init.dart";
-import "package:hazelnut/utils/navigation_mode_helper.dart";
+import "package:hazelnut/utils/route_observer.dart";
 import "package:hazelnut/utils/secure_storage_service.dart";
 import "package:flutter/material.dart";
 import "package:hazelnut/theme.dart";
@@ -17,17 +18,20 @@ final SecureStorageService secureStorage      = SecureStorageService();
 
 final GlobalKey<NavigatorState> navigatorKey  = GlobalKey<NavigatorState>();
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-
-late final String navigationMode;
+final routeObserver = GlobalRouteObserver();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  navigationMode = await NavigationModeHelper.getNavigationMode();
 
-  await initFirebase(secureStorage);
-  await initServices(secureStorage);
+  await PreferencesUtils().init();
+  await DatabaseService().init();
 
   runApp(ProviderScope(child: MyAppLifecycleHandler(child: const HazelnutApp())));
+
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await initFirebase(secureStorage);
+    await initFullServices(secureStorage);
+  });
 }
 
 class HazelnutApp extends ConsumerWidget {
@@ -41,6 +45,7 @@ class HazelnutApp extends ConsumerWidget {
     return MaterialApp(
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       navigatorKey: navigatorKey,
+      navigatorObservers: [routeObserver],
       color: Colors.transparent,
       debugShowCheckedModeBanner: false,
       title: "Hazelnut",
@@ -48,10 +53,12 @@ class HazelnutApp extends ConsumerWidget {
       darkTheme: darkMode,
       themeMode: ThemeMode.system,
       home: FutureBuilder(
-        future: getBool("setupComplete"),
+        future: PreferencesUtils().getBool("setupComplete"),
         builder: (context, asyncSnapshot) {
           if (!asyncSnapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(
+              color: Colors.deepOrange,
+            ));
           }
 
           return Stack(

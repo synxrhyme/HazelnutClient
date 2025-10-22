@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut/pages/chat_screen.dart';
 import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/chat_provider.dart';
-import 'package:hazelnut/utils/local_notifications.dart';
 import 'package:hazelnut/utils/models.dart';
 
 class ChatListOrPlaceholder extends ConsumerStatefulWidget {
@@ -85,13 +84,12 @@ class _ChatListOrPlaceholderState extends ConsumerState<ChatListOrPlaceholder> {
                 child: Material(
                   color: Colors.transparent,
                   child: GestureDetector(
-                    onTap: () {
-                      ChatNotifications().setCurrentChatId(chat.chatId);
-                      
+                    onTap: () {                     
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => ChatScreen(chatId: chat.chatId),
+                          settings: RouteSettings(name: "chatId_${chat.chatId}"),
                         ),
                       );
                     },

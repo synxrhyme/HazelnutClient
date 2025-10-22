@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hazelnut/components/navbar_item.dart';
-// ignore: unused_import
-import 'package:hazelnut/components/premium_background.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/utils/message_provider.dart';
-
-import "../theme.dart";
-
-import 'main_screens/main_page_1.dart';
-import 'main_screens/main_page_2.dart';
-import 'main_screens/main_page_3.dart';
+import "package:hazelnut/theme.dart";
+import "package:hazelnut/pages/main_screens/main_page_1.dart";
+import "package:hazelnut/pages/main_screens/main_page_2.dart";
+import "package:hazelnut/pages/main_screens/main_page_3.dart";
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

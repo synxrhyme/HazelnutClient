@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hazelnut/utils/chat_provider.dart';
 import 'package:hazelnut/utils/message_provider.dart';
+import 'package:hazelnut/utils/navigation_mode_helper.dart';
 
 class MainPage3 extends StatefulWidget {
   const MainPage3({super.key});
@@ -30,7 +31,7 @@ class _MainPage3State extends State<MainPage3> {
       top: true,
       left: false,
       right: false,
-      bottom: true,
+      bottom: NavigationModeHelper().navigationMode == "gesture" ? false : true,
       child: Column(
         children: [
           ElevatedButton(

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hazelnut/utils/chat_provider.dart';
+import 'package:hazelnut/utils/navigation_mode_helper.dart';
 import 'package:hazelnut/utils/secure_storage_service.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
 
@@ -54,7 +55,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
         top: true,
         left: false,
         right: false,
-        bottom: true,
+        bottom: NavigationModeHelper().navigationMode == "gesture" ? false : true,
         child: Container(
           color: theme.background.shade700,
           child: Align(

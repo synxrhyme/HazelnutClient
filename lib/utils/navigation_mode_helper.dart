@@ -1,14 +1,20 @@
 import 'package:flutter/services.dart';
 
 class NavigationModeHelper {
-  static const platform = MethodChannel('com.example.navigationmode');
+  NavigationModeHelper._internal() { getNavigationMode(); }
 
-  static Future<String> getNavigationMode() async {
+  static final NavigationModeHelper _instance = NavigationModeHelper._internal();
+  factory NavigationModeHelper() => _instance;
+
+  static const platform = MethodChannel('com.synxrhyme.navigationmode');
+  String? navigationMode;
+
+  void getNavigationMode() async {
     try {
-      final String mode = await platform.invokeMethod('getNavigationMode');
-      return mode;
-    } catch (e) {
-      return "unknown";
+      navigationMode = await platform.invokeMethod('getNavigationMode');
+    }
+    catch (e) {
+      navigationMode = "buttons";
     }
   }
 }

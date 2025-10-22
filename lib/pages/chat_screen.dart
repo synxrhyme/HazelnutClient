@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hazelnut/components/chat_list.dart';
 import 'package:hazelnut/utils/database_service.dart';
 import 'package:hazelnut/utils/local_notifications.dart';
+import 'package:hazelnut/utils/navigation_mode_helper.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:hazelnut/utils/secure_storage_service.dart';
 import 'package:hazelnut/theme.dart';
@@ -45,7 +46,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final message = {
       "header": "new_message",
       "body": {
-        "uId":           await getInt("lastUId"),
+        "uId":           await PreferencesUtils().getInt("lastUId") ?? 0,
         "pending":       1,
         "authToken":     await secureStorage.getToken("authToken"),
         "chatId":        widget.chatId,
@@ -135,7 +136,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   top: true,
                   left: false,
                   right: false,
-                  bottom: true,
+                  bottom: NavigationModeHelper().navigationMode == "gesture" ? false : true,
                   child: Container(),
                 ),
               ),
@@ -148,7 +149,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        ChatNotifications().setCurrentChatId(null);
                         Navigator.of(context).pop();
                       },
                       child: Container(
