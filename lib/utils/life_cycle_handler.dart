@@ -27,12 +27,6 @@ class _MyAppLifecycleHandlerState extends State<MyAppLifecycleHandler> with Widg
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
-      for (var chat in ChatProvider().chats) {
-        ChatNotifications().updateCache(chat.chatId);
-      }
-
-      debugPrint("App resumed, updated Notifications-Cache");
     }
   }
 
