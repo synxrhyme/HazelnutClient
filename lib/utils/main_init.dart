@@ -26,6 +26,7 @@ Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
   final prefs = await SharedPreferences.getInstance();
+  prefs.reload();
   final chatId = int.tryParse(message.data["chatId"].toString()) ?? 0;
   final key = "chat_$chatId";
   final prevCount = prefs.getInt(key) ?? 0;
