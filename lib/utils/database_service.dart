@@ -104,6 +104,20 @@ class DatabaseService {
     return latestId;
   }
 
+  Future<List<MessageModel>?> getPendingMessages() async {
+    final List<Map<String, dynamic>> mappedMessages = await messageDb.query(
+      'messages',
+      where: 'pending = ?',
+      whereArgs: [1],
+    );
+
+    if (mappedMessages.isEmpty) return null;
+
+    return List<MessageModel>.generate(mappedMessages.length, (index) {
+      return MessageModel.fromJson(mappedMessages[index]);
+    });
+  }
+
   void clearAll() async {
     await chatDb.delete("chats");
     await messageDb.delete("messages");

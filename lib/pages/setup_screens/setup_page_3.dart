@@ -65,7 +65,6 @@ class _SetupPage3State extends ConsumerState<SetupPage3> {
       }
     };
 
-    debugPrint(jsonEncode(request));
     WebSocketService().sendMessage(jsonEncode(request));
   }
 

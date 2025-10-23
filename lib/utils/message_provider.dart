@@ -5,7 +5,7 @@ import 'package:hazelnut/utils/models.dart';
 import 'package:hazelnut/utils/secure_storage_service.dart';
 
 class MessageProvider extends ChangeNotifier {
-  MessageProvider._internal();
+  MessageProvider._internal() { loadAll(); }
   static final MessageProvider _instance = MessageProvider._internal();
 
   factory MessageProvider() {

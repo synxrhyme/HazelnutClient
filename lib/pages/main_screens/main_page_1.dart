@@ -8,14 +8,14 @@ import 'package:hazelnut/utils/loading_provider.dart';
 import 'package:hazelnut/utils/models.dart';
 import 'package:hazelnut/utils/navigation_mode_helper.dart';
 
-class MainPage1 extends ConsumerStatefulWidget {
+class MainPage1 extends StatefulWidget {
   const MainPage1({super.key});
 
   @override
-  ConsumerState<MainPage1> createState() => _MainPage1State();
+  State<MainPage1> createState() => _MainPage1State();
 }
 
-class _MainPage1State extends ConsumerState<MainPage1> {
+class _MainPage1State extends State<MainPage1> {
   List<ChatModel> chats = ChatProvider().chats;
 
   @override
@@ -172,28 +172,33 @@ class _MainPage1State extends ConsumerState<MainPage1> {
                           ),
                         ),
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadiusGeometry.circular(5),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () async {
-                              ref.read(loadingServiceProvider).show();
-                              Future.delayed(Duration(seconds: 2)).then((_) {
-                                ref.read(loadingServiceProvider).hide();
-                              });
-                            },
-                            child: SizedBox(
-                              width: 50,
-                              height: 40,
-                              child: Icon(
-                                Icons.edit,
-                                size: 25,
-                                color: Theme.of(context).primaryColor,
+                      Consumer(
+                        builder: (context, ref, child) {
+                          return ClipRRect(
+                            borderRadius: BorderRadiusGeometry.circular(5),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () async {
+                                  ref.read(loadingServiceProvider).show();
+                                  Future.delayed(Duration(seconds: 2)).then((_) {
+                                    if (!mounted) return;
+                                    ref.read(loadingServiceProvider).hide();
+                                  });
+                                },
+                                child: SizedBox(
+                                  width: 50,
+                                  height: 40,
+                                  child: Icon(
+                                    Icons.edit,
+                                    size: 25,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ],
                   ),
