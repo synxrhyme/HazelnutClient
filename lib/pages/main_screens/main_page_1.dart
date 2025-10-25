@@ -4,9 +4,9 @@ import 'package:hazelnut/utils/chat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hazelnut/pages/add_chat_screen.dart';
 import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils/loading_provider.dart';
 import 'package:hazelnut/utils/models.dart';
 import 'package:hazelnut/utils/navigation_mode_helper.dart';
+import 'package:hazelnut/utils/snackbar_utils.dart';
 
 class MainPage1 extends StatefulWidget {
   const MainPage1({super.key});
@@ -180,11 +180,7 @@ class _MainPage1State extends State<MainPage1> {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () async {
-                                  ref.read(loadingServiceProvider).show();
-                                  Future.delayed(Duration(seconds: 2)).then((_) {
-                                    if (!mounted) return;
-                                    ref.read(loadingServiceProvider).hide();
-                                  });
+                                  showAnimatedSnackbar(color1: Colors.red, color2: Colors.redAccent, icon: Icons.edit, title: "Benutzername ändern - coming soon!", context: context, heightOffset: 50);
                                 },
                                 child: SizedBox(
                                   width: 50,

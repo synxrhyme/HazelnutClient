@@ -12,13 +12,17 @@ class DatabaseService {
   // --- State ---
   late final Database chatDb;
   late final Database messageDb;
+  late final Database userDb;
 
   bool initialized = false;
 
   Future<void> init() async {
-    if (initialized) return; // nur einmal ausführen
+    if (initialized) return;
+
     chatDb    = await _initChatDB();
     messageDb = await _initMessageDB();
+    userDb    = await _initUserDB();
+
     initialized = true;
   }
 
@@ -65,6 +69,24 @@ class DatabaseService {
     );
   }
 
+  Future<Database> _initUserDB() async {
+    final path = join(await getDatabasesPath(), 'user.db');
+    return openDatabase(
+      path,
+      version: 1,
+      onCreate: (db, version) {
+        return db.execute(
+          "CREATE TABLE users("
+            "userId TEXT PRIMARY KEY,"
+            "username TEXT,"
+            "joinedTimestamp TEXT,"
+            "lastSeen TEXT"
+          ")",
+        );
+      },
+    );
+  }
+
   Future<void> insertChatIntoDb(ChatModel chat) async {
     await chatDb.insert('chats', chat.exportJson());
   }
@@ -73,6 +95,10 @@ class DatabaseService {
     final int lastUId = await PreferencesUtils().getInt("lastUId") ?? 0;
     await PreferencesUtils().setInt("lastUId", lastUId + 1);
     await messageDb.insert('messages', message.exportJson());
+  }
+
+  Future<void> insertUserIntoDb(UserModel user) async {
+    await chatDb.insert('users', user.exportJson());
   }
 
   Future<List<ChatModel>> loadAllChats() async {

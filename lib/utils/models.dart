@@ -90,3 +90,38 @@ class MessageModel {
     };
   }
 }
+
+class UserModel {
+  final String userId;
+  final String username;
+  final String joinedTimestamp;
+  final String lastSeen;
+  bool online;
+
+  UserModel({
+    required this.userId,
+    required this.username,
+    required this.joinedTimestamp,
+    required this.lastSeen,
+    this.online = false,
+  });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      userId:           json["userId"],
+      username:         json["username"],
+      joinedTimestamp:  json["joinedTimestamp"],
+      lastSeen:         json["lastSeen"],
+      online:           json["online"] ?? false,
+    );
+  }
+
+  Map<String, dynamic> exportJson() {
+    return {
+      "userId":           userId,
+      "username":         username,
+      "joinedTimestamp":  joinedTimestamp,
+      "lastSeen":         lastSeen,
+    };
+  }
+}

@@ -19,7 +19,11 @@ class PreferencesUtils {
   //Future<String?> getString(String key)               async => prefs?.getString(key);
 
   Future<void>    setBool(String key, bool value)     async => await prefs?.setBool(key, value);
-  Future<bool?>   getBool(String key)                 async => prefs?.getBool(key);
+  Future<bool?>   getBool(String key) async {
+    final value = prefs?.getBool(key);
+    if (value == null && key == "setupComplete") return false;
+    return value;
+  }
 
   Future<void>    setInt(String key, int value)       async => prefs?.setInt(key, value);
   Future<int?>    getInt(String key)                  async => prefs?.getInt(key);

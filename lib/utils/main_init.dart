@@ -15,6 +15,7 @@ import 'package:hazelnut/utils/message_provider.dart';
 import 'package:hazelnut/utils/models.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:hazelnut/utils/secure_storage_service.dart';
+import 'package:hazelnut/utils/signout.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
 import 'package:hazelnut/utils/websocket_service.dart';
 
@@ -107,26 +108,22 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
 
           await PreferencesUtils().setBool("setupComplete", true);
 
+          WebSocketService().close();
+
           navigatorKey.currentState?.push(
             PageRouteBuilder(
               transitionDuration: Duration(milliseconds: 500),
               settings: RouteSettings(name: "homePage"),
               pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
               transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                const begin = Offset(1.0, 0.0); // Start rechts außerhalb des Bildschirms
-                const end = Offset.zero;        // Ende an der normalen Position
-                final tween = Tween(begin: begin, end: end);
-                final curvedAnimation = CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeInOut,
-                );
+                final slide = Tween<Offset>(begin: Offset(1, 0), end: Offset.zero).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut));
 
                 return SlideTransition(
-                  position: tween.animate(curvedAnimation),
+                  position: slide,
                   child: child,
                 );
               },
-            )
+            ),
           );
 
           break;
@@ -151,6 +148,16 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
       switch (data["status_code"]) {
         case 0: showSnackBar("Chatname schon vergeben", 0);
         case 1: showSnackBar("Chaterstellung erfolgreich", 2);
+
+        case 2: {
+          // TODO: Refresh token and retry
+          return;
+        }
+
+        case 3: {
+          signout();
+          return;
+        }
       }
 
       ref.read(loadingServiceProvider).hide();

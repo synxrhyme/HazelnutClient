@@ -173,7 +173,7 @@ class WebSocketService {
     final String userId = await secureStorage.getToken("userId");
 
     switch (data["header"]) {
-      case "session_key_response":
+      case "session_key_response": {
         if (data["status"] == "success") {
           if (await PreferencesUtils().getBool("setupComplete") == false) {
             setReady(true);
@@ -195,7 +195,10 @@ class WebSocketService {
           _socket?.close();
         }
 
-      case "auth_response":
+        break;
+      }
+
+      case "auth_response": {
         if (data["status"] == "valid") {
           setReady(true);
         } else if (data["status"] == "token_invalid") {
@@ -209,9 +212,14 @@ class WebSocketService {
             "header": "refresh",
             "body": {"userId": userId, "token": refreshToken},
           }));
+        } else if (data["status"] == "token_invalid") {
+          signout();
         }
 
-      case "refresh_response":
+        break;
+      }
+
+      case "refresh_response": {
         if (data["status"] == "valid") {
           final newAuthToken = data["body"]["authToken"];
           await secureStorage.saveToken("authToken", newAuthToken);
@@ -223,8 +231,10 @@ class WebSocketService {
           signout();
         }
 
-      case "force_signout":
-        signout();
+        break;
+      }
+
+      case "force_signout": signout();
 
       default:
         onMessage?.call(data, _ref);
@@ -273,7 +283,6 @@ class WebSocketService {
       return;
     }
 
-    debugPrint('[WebSocket] Sending message: $message');
     _sendDirect(message);
   }
 
@@ -289,6 +298,7 @@ class WebSocketService {
         "tag": encrypted["tag"],
       });
 
+      debugPrint('[WebSocket] Sending message: $message');
       _socket!.add(data);
     } catch (e) {
       showWebsocketErrorSnackbar();

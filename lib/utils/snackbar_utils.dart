@@ -100,3 +100,121 @@ void showSnackBar(String title, int type) {
       showingError = false;
     });
   }
+
+  class _AnimatedSnackbar extends StatefulWidget {
+  final IconData icon;
+  final Color color1;
+  final Color color2;
+  final String title;
+  final double heightOffset;
+  final VoidCallback onDismissed;
+
+  const _AnimatedSnackbar({
+    required this.icon,
+    required this.color1,
+    required this.color2,
+    required this.title,
+    required this.heightOffset,
+    required this.onDismissed,
+  });
+
+  @override
+  State<_AnimatedSnackbar> createState() => _AnimatedSnackbarState();
+}
+
+class _AnimatedSnackbarState extends State<_AnimatedSnackbar> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, -1),
+      end: Offset(0, 0),
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    ));
+
+    _controller.forward();
+
+    Future.delayed(Duration(seconds: 2), () {
+      _controller.reverse().then((_) => widget.onDismissed());
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: widget.heightOffset,
+      left: 15,
+      right: 15,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Material(
+          elevation: 10,
+          borderRadius: BorderRadius.circular(7),
+          color: Color(0xFF000000),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Icon(widget.icon, color: widget.color1),
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(
+                      color: widget.color2,
+                      fontFamily: "Space Grotesk",
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void showAnimatedSnackbar({
+  required BuildContext context,
+  required IconData icon,
+  required Color color1,
+  required Color color2,
+  required String title,
+  required double heightOffset,
+}) {
+  final overlay = Overlay.of(context);
+  late OverlayEntry overlayEntry;
+
+  overlayEntry = OverlayEntry(
+    builder: (context) => _AnimatedSnackbar(
+      icon: icon,
+      color1: color1,
+      color2: color2,
+      title: title,
+      heightOffset: heightOffset,
+      onDismissed: () {
+        overlayEntry.remove();
+      },
+    ),
+  );
+
+  overlay.insert(overlayEntry);
+}
