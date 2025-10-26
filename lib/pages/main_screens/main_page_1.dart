@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:hazelnut/pages/add_chat_screen.dart';
 import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/models.dart';
-import 'package:hazelnut/utils/navigation_mode_helper.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
 
 class MainPage1 extends StatefulWidget {
@@ -47,7 +46,7 @@ class _MainPage1State extends State<MainPage1> {
             top: true,
             left: false,
             right: false,
-            bottom: NavigationModeHelper().navigationMode == "gesture" ? false : true,
+            bottom: true,
             child: Container(),
           ),
         ),

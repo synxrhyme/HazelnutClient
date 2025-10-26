@@ -108,7 +108,7 @@ class WebSocketService {
           debugPrint('[WebSocket] Error: $error');
           _onDisconnected();
         },
-        cancelOnError: true,
+        cancelOnError: false,
       );
     } catch (e) {
       debugPrint('[WebSocket] Connect failed: $e');
@@ -212,7 +212,7 @@ class WebSocketService {
             "header": "refresh",
             "body": {"userId": userId, "token": refreshToken},
           }));
-        } else if (data["status"] == "token_invalid") {
+        } else if (data["status"] == "user_invalid") {
           signout();
         }
 
@@ -243,7 +243,6 @@ class WebSocketService {
 
   void _onDisconnected() {
     if (_forceClosed) return;
-    if (!_connected) return;
 
     _connected = false;
     _socket = null;
@@ -256,11 +255,12 @@ class WebSocketService {
   void _startReconnectLoop() {
     if (_reconnectTimer?.isActive ?? false) return;
     if (_forceClosed) return;
-
+  
     debugPrint('[WebSocket] Starting reconnect loop...');
-
     _reconnectTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
       if (_connected || _connecting || _forceClosed) return;
+  
+      debugPrint('[WebSocket] Trying reconnect...');
       await connect();
     });
   }
@@ -271,15 +271,16 @@ class WebSocketService {
   }
 
   Future<void> sendMessage(String message) async {
-    if (!_connected && _forceClosed) {
+    if (_forceClosed) {
       showWebsocketErrorSnackbar();
       return;
     }
 
-    if (!_ready || (!_connected && !_forceClosed)) {
+    if (!_connected || !_ready) {
       if (!_messageQueue.contains(message)) {
         _messageQueue.addLast(message);
       }
+
       return;
     }
 
@@ -305,9 +306,9 @@ class WebSocketService {
     }
   }
 
-  Future<void> close() async {
-    _forceClosed = true;
-    _stopReconnectLoop();
+  Future<void> close(bool forceClose) async {
+    _forceClosed = forceClose;
+    if (forceClose) _stopReconnectLoop();
     _pingTimer?.cancel();
 
     await _socket?.close();
@@ -316,7 +317,7 @@ class WebSocketService {
     _connected = false;
     _connecting = false;
 
-    debugPrint('[WebSocket] Connection closed by user.');
+    debugPrint('[WebSocket] Connection closed by user, forced: $forceClose');
   }
 }
 

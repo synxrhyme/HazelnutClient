@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -31,8 +32,8 @@ class DatabaseService {
     return openDatabase(
       path,
       version: 1,
-      onCreate: (db, version) {
-        return db.execute(
+      onCreate: (db, version) async {
+        await db.execute(
           "CREATE TABLE chats("
             "chatId INTEGER PRIMARY KEY,"
             "chatName TEXT,"
@@ -40,6 +41,14 @@ class DatabaseService {
             "createdById TEXT,"
             "createdByName TEXT,"
             "createdTimestamp TEXT"
+          ")",
+        );
+
+        await db.execute(
+          "CREATE TABLE chat_users("
+            "chatId INTEGER,"
+            "userId TEXT,"
+            "PRIMARY KEY (chatId, userId)"
           ")",
         );
       },
@@ -98,7 +107,38 @@ class DatabaseService {
   }
 
   Future<void> insertUserIntoDb(UserModel user) async {
-    await chatDb.insert('users', user.exportJson());
+    await userDb.insert('users', user.exportJson(), conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> addUserToChat(int chatId, UserModel user) async {
+    await insertUserIntoDb(user);
+    await chatDb.insert(
+      'chat_users',
+      {'chatId': chatId, 'userId': user.userId},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<UserModel>> getUsersForChat(int chatId) async {
+    final List<Map<String, dynamic>> mappings = await chatDb.query(
+      'chat_users',
+      where: 'chatId = ?',
+      whereArgs: [chatId],
+    );
+
+    final List<UserModel> users = [];
+    for (final m in mappings) {
+      final List<Map<String, dynamic>> rows = await userDb.query(
+        'users',
+        where: 'userId = ?',
+        whereArgs: [m['userId']],
+        limit: 1,
+      );
+      if (rows.isNotEmpty) {
+        users.add(UserModel.fromJson(rows.first));
+      }
+    }
+    return users;
   }
 
   Future<List<ChatModel>> loadAllChats() async {
@@ -130,6 +170,15 @@ class DatabaseService {
     return latestId;
   }
 
+  Future<List<UserModel>> loadAllUsers() async {
+    final List<Map<String, dynamic>> maps = await userDb.query('users');
+    debugPrint("Loaded: ${maps.toString()}");
+    
+    return List<UserModel>.generate(maps.length, (i) {
+      return UserModel.fromJson(maps[i]);
+    });
+  }
+
   Future<List<MessageModel>?> getPendingMessages() async {
     final List<Map<String, dynamic>> mappedMessages = await messageDb.query(
       'messages',
@@ -146,6 +195,8 @@ class DatabaseService {
 
   void clearAll() async {
     await chatDb.delete("chats");
+    await chatDb.delete("chat_users");
     await messageDb.delete("messages");
+    await userDb.delete("users");
   }
 }

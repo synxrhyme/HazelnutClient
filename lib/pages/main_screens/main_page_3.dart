@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hazelnut/utils/chat_provider.dart';
+import 'package:hazelnut/utils/database_service.dart';
 import 'package:hazelnut/utils/message_provider.dart';
-import 'package:hazelnut/utils/navigation_mode_helper.dart';
 
 class MainPage3 extends StatefulWidget {
   const MainPage3({super.key});
@@ -11,7 +11,7 @@ class MainPage3 extends StatefulWidget {
 }
 
 class _MainPage3State extends State<MainPage3> {
-  bool showChats = true;
+  int showing = 0;
 
   @override
   void initState() {
@@ -31,36 +31,63 @@ class _MainPage3State extends State<MainPage3> {
       top: true,
       left: false,
       right: false,
-      bottom: NavigationModeHelper().navigationMode == "gesture" ? false : true,
+      bottom: true,
       child: Column(
         children: [
           ElevatedButton(
-            onPressed: () => setState(() { showChats = !showChats; }),
+            onPressed: () => setState(() {
+              if (showing > 1) { showing = 0; }
+              else { showing += 1; }
+            }),
             child: Text("change"),
           ),
           Expanded(
-            child: showChats ?
-              ListView.builder(
-                itemCount: ChatProvider().chats.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(ChatProvider().chats[index].chatName),
-                    subtitle: Text("${ChatProvider().chats[index].createdByName} -- ${ChatProvider().chats[index].chatId}"),
+            child: Builder(
+              builder: (context) {
+                switch (showing) {
+                  case 0: return ListView.builder(
+                    itemCount: ChatProvider().chats.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(ChatProvider().chats[index].chatName),
+                        subtitle: Text("${ChatProvider().chats[index].createdByName} -- ${ChatProvider().chats[index].chatId}"),
+                      );
+                    }
                   );
-                }  
-              )
-          
-              :
-          
-              ListView.builder(
-                itemCount: MessageProvider().messagesForChat(0).length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text("${MessageProvider().messagesForChat(0)[index].senderName} -- ${MessageProvider().messagesForChat(0)[index].uId.toString()}"),
-                    subtitle: Text("${MessageProvider().messagesForChat(0)[index].text} -- ${MessageProvider().messagesForChat(0)[index].sentTimestamp}"),
+
+                  case 1: return ListView.builder(
+                    itemCount: MessageProvider().messagesForChat(0).length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text("${MessageProvider().messagesForChat(0)[index].senderName} -- ${MessageProvider().messagesForChat(0)[index].uId.toString()}"),
+                        subtitle: Text("${MessageProvider().messagesForChat(0)[index].text} -- ${MessageProvider().messagesForChat(0)[index].sentTimestamp}"),
+                      );
+                    }
                   );
-                }  
-              ),
+
+                  case 2: return FutureBuilder(
+                    future: DatabaseService().loadAllUsers(),
+                    builder: (context, asyncSnapshot) {
+                      while (asyncSnapshot.connectionState != ConnectionState.done) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      return ListView.builder(
+                        itemCount: asyncSnapshot.data?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text("${asyncSnapshot.data?[index].userId} -- ${asyncSnapshot.data?[index].username}"),
+                            subtitle: Text("online: ${asyncSnapshot.data?[index].online} -- last seen: ${asyncSnapshot.data?[index].lastSeen}"),
+                          );
+                        }
+                      );
+                    }
+                  );
+
+                  default: return const SizedBox.shrink();
+                }
+              }
+            ),
           ),
         ],
       ),

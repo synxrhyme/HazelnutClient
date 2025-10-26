@@ -108,7 +108,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
 
           await PreferencesUtils().setBool("setupComplete", true);
 
-          WebSocketService().close();
+          WebSocketService().close(false);
 
           navigatorKey.currentState?.push(
             PageRouteBuilder(
@@ -175,10 +175,22 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
           final ChatModel chatModel = ChatModel.fromJson(data["body"]);
           ChatProvider().addChat(chatModel);
 
+          final List<Map<String,dynamic>> users = List<Map<String,dynamic>>.from(data["body"]["users"]);
+
+          if (users.isNotEmpty) {
+            for (final Map<String,dynamic> user_ in users) {
+              final UserModel user = UserModel.fromJson(user_);
+              if (user.userId != MessageProvider().userId) chatModel.addUser(user);
+            }
+
+            ChatProvider().loadChats();
+          }
+          
           showSnackBar("Erfolgreich beigetreten", 2);
           ref.read(loadingServiceProvider).hide();
           navigatorKey.currentState?.pop();
         }
+        case 6: showSnackBar("Fehler", 0);
       }
       
       break;

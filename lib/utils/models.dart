@@ -1,3 +1,5 @@
+import 'package:hazelnut/utils/database_service.dart';
+
 class ChatModel {
   final int    chatId;
   final String chatName;
@@ -5,13 +7,14 @@ class ChatModel {
   final String createdById;
   final String createdByName;
   final String createdTimestamp;
+  List<UserModel> users = [];
 
   ChatModel({
     required this.chatId,
     required this.chatName,
     required this.chatAuth,
-    required this.createdById, 
-    required this.createdByName, 
+    required this.createdById,
+    required this.createdByName,
     required this.createdTimestamp,
   });
 
@@ -35,6 +38,11 @@ class ChatModel {
       "createdByName":    createdByName,
       "createdTimestamp": createdTimestamp,
     };
+  }
+
+  void addUser(UserModel user) {
+    users.add(user);
+    DatabaseService().addUserToChat(chatId, user);
   }
 }
 

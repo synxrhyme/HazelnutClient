@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hazelnut/components/chat_list.dart';
 import 'package:hazelnut/utils/database_service.dart';
 import 'package:hazelnut/utils/local_notifications.dart';
-import 'package:hazelnut/utils/navigation_mode_helper.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:hazelnut/utils/secure_storage_service.dart';
 import 'package:hazelnut/theme.dart';
@@ -136,7 +135,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   top: true,
                   left: false,
                   right: false,
-                  bottom: NavigationModeHelper().navigationMode == "gesture" ? false : true,
+                  bottom: true,
                   child: Container(),
                 ),
               ),
@@ -204,6 +203,17 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                               ),
                             ),
+                            Container(
+                              margin: EdgeInsets.only(right: 10),
+                              child: Builder(
+                                builder: (context) => IconButton(
+                                  icon: const Icon(Icons.menu),
+                                  padding: EdgeInsets.only(right: 10, left: 10, top: 10, bottom: 10),
+                                  color: Theme.of(context).primaryColor,
+                                  onPressed: () => Scaffold.of(context).openDrawer(),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -214,6 +224,193 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
         ],
+      ),
+
+      drawer: SafeArea(
+        child: Drawer(
+          backgroundColor: theme.background.shade700,
+          child: FutureBuilder(
+            future: DatabaseService().getUsersForChat(widget.chatId),
+            builder: (context, asyncSnapshot) {
+              return Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(top: 15),
+                    color: theme.background.shade600,
+                    height: 55,
+                    child: Text(
+                      "Nutzer im Chat",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor.withAlpha(200),
+                        fontFamily: "Space Grotesk",
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: asyncSnapshot.data?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          width: double.infinity,
+                          margin: EdgeInsets.only(top: 5, bottom: 5, left: 15, right: 10),
+                          height: 50,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      asyncSnapshot.data?[index].username ?? "Unbekannt",
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor.withAlpha(200),
+                                        fontFamily: "Space Grotesk",
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    Text(
+                                      asyncSnapshot.data?[index].online ?? false ? "Online" : "Offline",
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor.withAlpha(150),
+                                        fontFamily: "Space Grotesk",
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  final joinedDate = DateTime.parse(asyncSnapshot.data?[index].joinedTimestamp ?? DateTime.now().toIso8601String());
+                                  
+                                  showMenu<String>(
+                                    context: context,
+                                    position: RelativeRect.fromLTRB(100, 100, 0, 0), // x, y Koordinaten
+                                    items: [
+                                      PopupMenuItem(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            text: "Username:  ",
+                                            style: TextStyle(
+                                              color: Theme.of(context).primaryColor.withAlpha(200),
+                                              fontFamily: "Space Grotesk",
+                                              fontSize: 14,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: asyncSnapshot.data?[index].username,
+                                                style: TextStyle(
+                                                  color: Theme.of(context).primaryColor.withAlpha(200),
+                                                  fontFamily: "Space Grotesk",
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ]
+                                          ),
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            text: "User-ID:  ",
+                                            style: TextStyle(
+                                              color: Theme.of(context).primaryColor.withAlpha(200),
+                                              fontFamily: "Space Grotesk",
+                                              fontSize: 14,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: asyncSnapshot.data?[index].userId,
+                                                style: TextStyle(
+                                                  color: Theme.of(context).primaryColor.withAlpha(200),
+                                                  fontFamily: "Space Grotesk",
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ]
+                                          ),
+                                        ),
+                                      ),
+                                      PopupMenuItem(child: Flexible(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            style: TextStyle(
+                                              color: Theme.of(context).primaryColor.withAlpha(200),
+                                              fontFamily: "Space Grotesk",
+                                              fontSize: 14,
+                                            ),
+                                            text: "Beigetreten am:",
+                                            children: [
+                                              TextSpan(
+                                                text: " ${joinedDate.day.toString().padLeft(2, '0')}.${joinedDate.month.toString().padLeft(2, '0')}.${joinedDate.year}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: " um ",
+                                              ),
+                                              TextSpan(
+                                                text: "${joinedDate.hour.toString().padLeft(2, '0')}:${joinedDate.minute.toString().padLeft(2, '0')}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      )),
+                                      PopupMenuItem(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            text: "Online:  ",
+                                            style: TextStyle(
+                                              color: Theme.of(context).primaryColor.withAlpha(200),
+                                              fontFamily: "Space Grotesk",
+                                              fontSize: 14,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: asyncSnapshot.data?[index].online ?? false ? "Ja" : "Nein",
+                                                style: TextStyle(
+                                                  color: Theme.of(context).primaryColor.withAlpha(200),
+                                                  fontFamily: "Space Grotesk",
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ]
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                child: SizedBox(
+                                  width: 50,
+                                  height: double.infinity,
+                                  child: Icon(
+                                    Icons.info_outline_rounded,
+                                    color: Theme.of(context).primaryColor.withAlpha(200),
+                                  )
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    ),
+                  ),
+                ],
+              );
+            }
+          ),
+        ),
       ),
     );
   }

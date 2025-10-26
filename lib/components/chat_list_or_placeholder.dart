@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut/pages/chat_screen.dart';
 import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/chat_provider.dart';
+import 'package:hazelnut/utils/message_provider.dart';
 import 'package:hazelnut/utils/models.dart';
 
 class ChatListOrPlaceholder extends ConsumerStatefulWidget {
@@ -120,7 +121,7 @@ class _ChatListOrPlaceholderState extends ConsumerState<ChatListOrPlaceholder> {
                               chat.chatName[0].toUpperCase(),
                               style: TextStyle(
                                 fontSize: 20,
-                                color: theme.basicChatColor,
+                                color: getAccentFromString(chat.chatName),
                               ),
                             ),
                           ),
