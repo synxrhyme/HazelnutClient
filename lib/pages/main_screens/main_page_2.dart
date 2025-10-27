@@ -112,12 +112,24 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                       child: ElevatedButton(
                         onPressed: () async {
                           if (chatNameController.text == "") {
-                            showSnackBar("Chatroom-Name ist nicht gesetzt!", 1);
+                            showAnimatedSnackbarGlobal(
+                              icon: Icons.error_outline_rounded,
+                              color1: theme.info.shade500!,
+                              color2: theme.info.shade400!,
+                              title: "Chatroom-Name ist nicht gesetzt!",
+                              heightOffset: 50,
+                            );
                             return;
                           }
     
                           if (chatAuthController.text == "") {
-                            showSnackBar("Chatroom-Passwort ist nicht gesetzt!", 1);
+                            showAnimatedSnackbarGlobal(
+                              icon: Icons.error_outline_rounded,
+                              color1: theme.info.shade500!,
+                              color2: theme.info.shade400!,
+                              title: "Chatroom-Passwort ist nicht gesetzt!",
+                              heightOffset: 50,
+                            );
                             return;
                           }
 

@@ -179,7 +179,13 @@ class _MainPage1State extends State<MainPage1> {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () async {
-                                  showAnimatedSnackbar(color1: Colors.red, color2: Colors.redAccent, icon: Icons.edit, title: "Benutzername ändern - coming soon!", context: context, heightOffset: 50);
+                                  showAnimatedSnackbarGlobal(
+                                    icon: Icons.warning,
+                                    color1: Colors.yellow,
+                                    color2: Colors.white,
+                                    title: "Verbindung getrennt!",
+                                    heightOffset: 50,
+                                  );
                                 },
                                 child: SizedBox(
                                   width: 50,

@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hazelnut/utils/chat_provider.dart';
 import 'package:hazelnut/utils/secure_storage_service.dart';
-import 'package:hazelnut/utils/snackbar_utils.dart';
 
 import 'package:hazelnut/theme.dart';
+import 'package:hazelnut/utils/snackbar_utils.dart';
 import 'package:hazelnut/utils/websocket_service.dart';
 
 class AddChatScreen extends StatefulWidget {
@@ -115,15 +115,27 @@ class _AddChatScreenState extends State<AddChatScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            if (chatNameController.text == "") {
-                              showSnackBar("Chatroom-Name ist nicht gesetzt!", 1);
-                              return;
-                            }
-
-                            if (chatAuthController.text == "") {
-                              showSnackBar("Chatroom-Passwort ist nicht gesetzt!", 1);
-                              return;
-                            }
+                          if (chatNameController.text == "") {
+                            showAnimatedSnackbarGlobal(
+                              color1: theme.info.shade500!,
+                              color2: theme.info.shade400!,
+                              icon: Icons.error_outline_rounded,
+                              title: "Chatroom-Name ist nicht gesetzt!",
+                              heightOffset: 50,
+                            );
+                            return;
+                          }
+    
+                          if (chatAuthController.text == "") {
+                            showAnimatedSnackbarGlobal(
+                              color1: theme.info.shade500!,
+                              color2: theme.info.shade400!,
+                              icon: Icons.error_outline_rounded,
+                              title: "Chatroom-Passwort ist nicht gesetzt!",
+                              heightOffset: 50,
+                            );
+                            return;
+                          }
 
                             final String userId    = await secureStorage.getToken("userId");
                             final String authToken = await secureStorage.getToken("authToken");

@@ -1,107 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hazelnut/main.dart';
-import 'package:hazelnut/theme.dart';
 
-bool showingError = false;
+OverlayEntry? _currentSnackbarEntry;
+Timer? _dismissTimer;
+String? _currentMessage;
 
-void showSnackBar(String title, int type) {
-  if (showingError) return;
-  showingError = true;
-
-  Color? color1;
-  Color? color2;
-
-  IconData? icon;
-
-  final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
-
-  switch (type) {
-    case 0:
-      color1 = theme.warning.shade500;
-      color2 = theme.warning.shade500;
-      icon = Icons.error_outline_rounded;
-    case 1:
-      color1 = theme.info.shade500;
-      color2 = theme.info.shade400;
-      icon = Icons.error_outline_rounded;
-    case 2:
-      color1 = theme.success.shade500;
-      color2 = theme.success.shade500;
-      icon = Icons.check_circle_outline;
-  }
-
-  final window = WidgetsBinding.instance.platformDispatcher.views.first;
-  final size = window.physicalSize / window.devicePixelRatio;
-
-  rootScaffoldMessengerKey.currentState?.showSnackBar(
-    SnackBar(
-      behavior: SnackBarBehavior.floating,
-      dismissDirection: DismissDirection.up,
-      margin: EdgeInsets.only(bottom: size.height - 110, left: 15, right: 15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(7),
-      ),
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Icon(icon, color: color1),
-          Text(
-            title,
-            style: TextStyle(
-              color: color2,
-              fontFamily: "Space Grotesk"
-            ),
-            textAlign: TextAlign.center
-          ),
-        ],
-      ),
-      duration: Duration(seconds: 2),
-      backgroundColor: Color(0xFF000000),
-    ),
-  ).closed.then((_) {
-    showingError = false;
-  });
-}
-
-  void showWebsocketErrorSnackbar() {
-    if (showingError) return;
-    showingError = true;
-
-    final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
-
-    rootScaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        dismissDirection: DismissDirection.up,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(rootScaffoldMessengerKey.currentContext!).size.height - 110,
-          left: 15,
-          right: 15,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Icon(Icons.wifi_off_rounded, color: theme.error.shade600, size: 30),
-            Text(
-              'Es gab ein Problem beim\nVerbindungsaufbau zum Server',
-              style: TextStyle(
-                color: theme.error.shade500,
-                fontFamily: "Space Grotesk"
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        duration: Duration(seconds: 2),
-        backgroundColor: theme.background.shade800,
-      ),
-    ).closed.then((_) {
-      showingError = false;
-    });
-  }
-
-  class _AnimatedSnackbar extends StatefulWidget {
+class _AnimatedSnackbar extends StatefulWidget {
   final IconData icon;
   final Color color1;
   final Color color2;
@@ -122,7 +27,8 @@ void showSnackBar(String title, int type) {
   State<_AnimatedSnackbar> createState() => _AnimatedSnackbarState();
 }
 
-class _AnimatedSnackbarState extends State<_AnimatedSnackbar> with SingleTickerProviderStateMixin {
+class _AnimatedSnackbarState extends State<_AnimatedSnackbar>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
 
@@ -130,23 +36,24 @@ class _AnimatedSnackbarState extends State<_AnimatedSnackbar> with SingleTickerP
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: Offset(0, -1),
-      end: Offset(0, 0),
+      begin: const Offset(0, -1),
+      end: const Offset(0, 0),
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOut,
     ));
 
     _controller.forward();
+  }
 
-    Future.delayed(Duration(seconds: 2), () {
-      _controller.reverse().then((_) => widget.onDismissed());
-    });
+  Future<void> dismiss() async {
+    await _controller.reverse();
+    widget.onDismissed();
   }
 
   @override
@@ -166,9 +73,9 @@ class _AnimatedSnackbarState extends State<_AnimatedSnackbar> with SingleTickerP
         child: Material(
           elevation: 10,
           borderRadius: BorderRadius.circular(7),
-          color: Color(0xFF000000),
+          color: const Color(0xFF000000),
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -192,17 +99,28 @@ class _AnimatedSnackbarState extends State<_AnimatedSnackbar> with SingleTickerP
   }
 }
 
-void showAnimatedSnackbar({
-  required BuildContext context,
+void showAnimatedSnackbarGlobal({
   required IconData icon,
   required Color color1,
   required Color color2,
   required String title,
   required double heightOffset,
 }) {
-  final overlay = Overlay.of(context);
-  late OverlayEntry overlayEntry;
+  final overlay = navigatorKey.currentState?.overlay;
+  if (overlay == null) {
+    debugPrint("Kein Overlay gefunden - App evtl. noch nicht aufgebaut?");
+    return;
+  }
 
+  if (_currentMessage == title && _currentSnackbarEntry != null) {
+    _resetDismissTimer(); // Verlängere Sichtzeit
+    return;
+  }
+
+  _dismissCurrentSnackbar();
+
+  // 3️⃣ Neue Snackbar erzeugen
+  late OverlayEntry overlayEntry;
   overlayEntry = OverlayEntry(
     builder: (context) => _AnimatedSnackbar(
       icon: icon,
@@ -211,10 +129,43 @@ void showAnimatedSnackbar({
       title: title,
       heightOffset: heightOffset,
       onDismissed: () {
+        if (overlayEntry == _currentSnackbarEntry) {
+          _currentSnackbarEntry = null;
+          _currentMessage = null;
+        }
         overlayEntry.remove();
       },
     ),
   );
 
   overlay.insert(overlayEntry);
+  _currentSnackbarEntry = overlayEntry;
+  _currentMessage = title;
+
+  // 5️⃣ Dismiss-Timer starten
+  _startDismissTimer(() {
+    _dismissCurrentSnackbar();
+  });
+}
+
+void _startDismissTimer(VoidCallback onDone) {
+  _dismissTimer?.cancel();
+  _dismissTimer = Timer(const Duration(seconds: 2), onDone);
+}
+
+void _resetDismissTimer() {
+  if (_dismissTimer == null) return;
+  _dismissTimer!.cancel();
+  _dismissTimer = Timer(const Duration(seconds: 2), () {
+    _dismissCurrentSnackbar();
+  });
+}
+
+void _dismissCurrentSnackbar() {
+  _dismissTimer?.cancel();
+  _dismissTimer = null;
+
+  _currentSnackbarEntry?.remove();
+  _currentSnackbarEntry = null;
+  _currentMessage = null;
 }

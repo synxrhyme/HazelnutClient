@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/pages/home_page.dart';
+import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/chat_provider.dart';
 import 'package:hazelnut/utils/database_service.dart';
 import 'package:hazelnut/utils/loading_provider.dart';
@@ -94,6 +95,7 @@ Future<void> initFullServices(SecureStorageService secureStorage) async {
 
 void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
   debugPrint(data.toString());
+  final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
   
   switch (data["header"]) {
     case "registration_response": {
@@ -130,12 +132,26 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
         }
 
         case "username_taken": {
-          showSnackBar("Username schon vergeben!", 0);
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
+            title: "Username schon vergeben!",
+            heightOffset: 50,
+          );
+
           break;
         }
 
         case "app_already_registered": {
-          showSnackBar("Diese App wurde\nschon registriert??", 0);
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
+            title: "Diese App wurde\nschon registriert??",
+            heightOffset: 50,
+          );
+
           break;
         }
       }
@@ -146,8 +162,29 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
 
     case "chat_creation_response": {
       switch (data["status_code"]) {
-        case 0: showSnackBar("Chatname schon vergeben", 0);
-        case 1: showSnackBar("Chaterstellung erfolgreich", 2);
+        case 0: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
+            title: "Chatname schon vergeben",
+            heightOffset: 50,
+          );
+
+          break;
+        }
+
+        case 1: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.check_circle_outline_rounded,
+            color1 :theme.success.shade500!,
+            color2 :theme.success.shade500!,
+            title: "Chaterstellung erfolgreich",
+            heightOffset: 50,
+          );
+
+          break;
+        }
 
         case 2: {
           // TODO: Refresh token and retry
@@ -155,6 +192,14 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
         }
 
         case 3: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
+            title: "Nutzer nicht bekannt",
+            heightOffset: 50,
+          );
+
           signout();
           return;
         }
@@ -168,9 +213,42 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
       debugPrint(data.toString());
       
       switch (data["status_code"]) {
-        case 0: showSnackBar("Kein Chatroom gefunden", 0);
-        case 1: showSnackBar("Falsches Passwort", 0);
-        case 2: showSnackBar("Du bist bereits Mitglied", 1);
+        case 0: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade500!,
+            title: "Kein Chatroom gefunden",
+            heightOffset: 50,
+          );
+
+          break;
+        }
+
+        case 1: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade500!,
+            title: "Falsches Passwort",
+            heightOffset: 50,
+          );
+
+          break;
+        }
+
+        case 2: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.info.shade500!,
+            color2: theme.info.shade400!,
+            title: "Du bist bereits Mitglied",
+            heightOffset: 50,
+          );
+
+          break;
+        }
+
         case 3: {
           final ChatModel chatModel = ChatModel.fromJson(data["body"]);
           ChatProvider().addChat(chatModel);
@@ -186,11 +264,30 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
             ChatProvider().loadChats();
           }
           
-          showSnackBar("Erfolgreich beigetreten", 2);
+          showAnimatedSnackbarGlobal(
+            icon: Icons.check_circle_outline,
+            color1: theme.success.shade500!,
+            color2: theme.success.shade500!,
+            title: "Erfolgreich beigetreten",
+            heightOffset: 50,
+          );
+
           ref.read(loadingServiceProvider).hide();
           navigatorKey.currentState?.pop();
+          break;
         }
-        case 6: showSnackBar("Fehler", 0);
+
+        case 6: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade500!,
+            title: "Fehler kurwa",
+            heightOffset: 50,
+          );
+
+          break;
+        }
       }
       
       break;
