@@ -115,12 +115,12 @@ class _ChatListOrPlaceholderState extends ConsumerState<ChatListOrPlaceholder> {
                       child: Row(
                         children: [
                           CircleAvatar(
-                            radius: 22,
+                            radius: 25,
                             backgroundColor: theme.background.shade600,
                             child: Text(
                               chat.chatName[0].toUpperCase(),
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 22,
                                 color: getAccentFromString(chat.chatName),
                               ),
                             ),
@@ -139,10 +139,8 @@ class _ChatListOrPlaceholderState extends ConsumerState<ChatListOrPlaceholder> {
                                 right: 20,
                               ),
                               child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.center,
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     chat.chatName,
@@ -150,7 +148,19 @@ class _ChatListOrPlaceholderState extends ConsumerState<ChatListOrPlaceholder> {
                                     style: TextStyle(
                                       color: Theme.of(context).primaryColor.withAlpha(240),
                                       fontFamily: "Space Grotesk",
-                                      fontSize: 17,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Letzte Nachricht",
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor.withAlpha(200),
+                                      fontFamily: "Space Grotesk",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w300,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),

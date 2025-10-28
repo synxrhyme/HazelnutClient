@@ -138,7 +138,6 @@ class _AddChatScreenState extends State<AddChatScreen> {
                           }
 
                             final String userId    = await secureStorage.getToken("userId");
-                            final String authToken = await secureStorage.getToken("authToken");
                             final String chatName  = chatNameController.text.toString();
                             final String chatAuth  = chatAuthController.text.toString();
                             final String timestamp = DateTime.now().toUtc().toIso8601String();
@@ -147,7 +146,6 @@ class _AddChatScreenState extends State<AddChatScreen> {
                               "header": "join_chat",
                               "body": {
                                 "userId":    userId,
-                                "authToken": authToken,
                                 "chatName":  chatName,
                                 "chatAuth":  chatAuth,
                                 "timestamp": timestamp

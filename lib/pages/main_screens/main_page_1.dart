@@ -90,7 +90,7 @@ class _MainPage1State extends State<MainPage1> {
                   margin: EdgeInsets.only(right: 20, left: 30),
                   padding: EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadiusGeometry.circular(5),
@@ -171,6 +171,9 @@ class _MainPage1State extends State<MainPage1> {
                           ),
                         ),
                       ),
+                      SizedBox(
+                        width: 30,
+                      ),
                       Consumer(
                         builder: (context, ref, child) {
                           return ClipRRect(
@@ -183,7 +186,7 @@ class _MainPage1State extends State<MainPage1> {
                                     icon: Icons.warning,
                                     color1: Colors.yellow,
                                     color2: Colors.white,
-                                    title: "Verbindung getrennt!",
+                                    title: "Test!",
                                     heightOffset: 50,
                                   );
                                 },

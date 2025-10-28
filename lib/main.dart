@@ -15,8 +15,8 @@ import "package:hazelnut/pages/setup_page.dart";
 
 final EventProvider eventProviderGlobal       = EventProvider();
 final SecureStorageService secureStorage      = SecureStorageService();
-
 final GlobalKey<NavigatorState> navigatorKey  = GlobalKey<NavigatorState>();
+
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 final routeObserver = GlobalRouteObserver();
 

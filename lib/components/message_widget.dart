@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hazelnut/theme.dart';
+import 'package:hazelnut/utils.dart';
 import 'package:hazelnut/utils/message_provider.dart';
 import 'package:hazelnut/utils/models.dart';
 
@@ -51,7 +52,7 @@ class MessageWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                         "${message.senderName}${message.senderId == userId ? " (Du)" : ""}",
+                         "${sanitizeRawInput(message.senderName, maxLength: 30, forDisplay: true)}${message.senderId == userId ? " (Du)" : ""}",
                           style: TextStyle(
                             color: color.withAlpha(200),
                             fontFamily: "Space Grotesk",
@@ -62,7 +63,7 @@ class MessageWidget extends StatelessWidget {
                         ),
                         SizedBox(height: 3),
                         Text(
-                          message.text,
+                          sanitizeRawInput(message.text, maxLength: 65535, forDisplay: true),
                           softWrap: true,
                           style: TextStyle(
                             color: Theme.of(context).primaryColor.withAlpha(230),

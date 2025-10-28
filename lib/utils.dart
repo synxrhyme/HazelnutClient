@@ -1,3 +1,5 @@
+import "dart:convert";
+import 'package:characters/characters.dart';
 import "package:flutter/material.dart";
 import "package:permission_handler/permission_handler.dart";
 
@@ -30,16 +32,24 @@ Future<void> showNotification(int id, String title, String body) async {
 }
 */
 
-List<double> saturationMatrix(double saturation) {
-    final double invSat = 1 - saturation;
-    final double r = 0.213 * invSat;
-    final double g = 0.715 * invSat;
-    final double b = 0.072 * invSat;
+String sanitizeRawInput(
+  String? input, {
+  int maxLength = 2000,
+  bool forDisplay = false,
+}) {
+  if (input == null) return '';
 
-    return [
-      r + saturation, g, b, 0, 0,
-      r, g + saturation, b, 0, 0,
-      r, g, b + saturation, 0, 0,
-      0, 0, 0, 1, 0,
-    ];
+  var sanitized = input.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+  sanitized = sanitized.trim();
+
+  // Zeichenbegrenzung (unicode-safe)
+  if (sanitized.characters.length > maxLength) {
+    sanitized = sanitized.characters.take(maxLength).toString();
   }
+
+  if (forDisplay) {
+    sanitized = const HtmlEscape().convert(sanitized);
+  }
+
+  return sanitized;
+}

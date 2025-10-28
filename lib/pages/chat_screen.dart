@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hazelnut/components/chat_list.dart';
+import 'package:hazelnut/utils.dart';
 import 'package:hazelnut/utils/database_service.dart';
 import 'package:hazelnut/utils/local_notifications.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
@@ -42,14 +43,15 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
+    final safeMessage = sanitizeRawInput(text, maxLength: 65536);
+
     final message = {
       "header": "new_message",
       "body": {
         "uId":           await PreferencesUtils().getInt("lastUId") ?? 0,
         "pending":       1,
-        "authToken":     await secureStorage.getToken("authToken"),
         "chatId":        widget.chatId,
-        "text":          text.toString(),
+        "text":          safeMessage.toString(),
         "senderId":      await secureStorage.getToken("userId"),
         "senderName":    await secureStorage.getToken("username"),
         "sentTimestamp": DateTime.now().toUtc().toIso8601String(),
@@ -130,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Column(
             children: [
               Container(
-                color: theme.background.shade600,
+                color: theme.background.shade700,
                 child: SafeArea(
                   top: true,
                   left: false,
@@ -142,7 +144,7 @@ class _ChatScreenState extends State<ChatScreen> {
               Container(
                 height: 55,
                 width: double.infinity,
-                color: theme.background.shade600,
+                color: theme.background.shade700,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -176,7 +178,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   chat.chatName[0].toUpperCase(),
                                   style: TextStyle(
                                     fontSize: 18,
-                                    color: Color(0xFF6A760C),
+                                    color: getAccentFromString(chat.chatName),
                                   ),
                                 ),
                               ),
@@ -250,7 +252,27 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                   Expanded(
-                    child: ListView.builder(
+                    child: asyncSnapshot.data?.isEmpty ?? true ? 
+                    
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.not_accessible_rounded),
+                        Text(
+                          "Du bist der einzige hier",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor.withAlpha(150),
+                            fontFamily: "Space Grotesk",
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    )
+
+                    :
+                    
+                    ListView.builder(
                       itemCount: asyncSnapshot.data?.length ?? 0,
                       itemBuilder: (context, index) {
                         return Container(

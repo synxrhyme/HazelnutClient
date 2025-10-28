@@ -134,9 +134,9 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                           }
 
                           ref.read(loadingServiceProvider).show();
+                          await Future.delayed(Duration.zero);
     
                           final String userId    = await secureStorage.getToken("userId");
-                          final String authToken = await secureStorage.getToken("authToken");
                           final String chatName  = chatNameController.text.toString();
                           final String chatAuth  = chatAuthController.text.toString();
                           final String timestamp = DateTime.now().toUtc().toIso8601String();
@@ -145,7 +145,6 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                             "header": "create_chat",
                             "body": {
                               "userId":    userId,
-                              "authToken": authToken,
                               "chatName":  chatName,
                               "chatAuth":  chatAuth,
                               "timestamp": timestamp

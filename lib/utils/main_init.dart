@@ -187,7 +187,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
         }
 
         case 2: {
-          // TODO: Refresh token and retry
+          WebSocketService().refreshForAction(data["action"]);
           return;
         }
 
@@ -277,15 +277,34 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
           break;
         }
 
-        case 6: {
+        case 4: {
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade500!,
-            title: "Fehler kurwa",
+            title: "Falscher User",
             heightOffset: 50,
           );
 
+          signout();
+          break;
+        }
+
+        case 5: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade500!,
+            title: "User nicht bekannt",
+            heightOffset: 50,
+          );
+
+          signout();
+          break;
+        }
+
+        case 6: {
+          WebSocketService().refreshForAction(data["action"]);
           break;
         }
       }

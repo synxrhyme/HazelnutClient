@@ -112,7 +112,9 @@ class WebSocketService {
         },
         cancelOnError: false,
       );
-    } catch (e) {
+    }
+    
+    catch (e) {
       debugPrint('[WebSocket] Connect failed: $e');
       _connected = false;
       _connecting = false;
@@ -140,7 +142,9 @@ class WebSocketService {
       try {
         _socket!.add(jsonEncode({"type": "ping"}));
         debugPrint('[WebSocket] Ping gesendet.');
-      } catch (e) {
+      }
+      
+      catch (e) {
         debugPrint('[WebSocket] Ping send error: $e');
       }
     });
@@ -200,9 +204,11 @@ class WebSocketService {
 
           _sendDirect(jsonEncode({
             "header": "auth",
-            "body": {"userId": userId, "token": authToken},
+            "body": { "userId": userId, "token": authToken },
           }));
-        } else {
+        }
+        
+        else {
           _socket?.close();
         }
 
@@ -212,7 +218,9 @@ class WebSocketService {
       case "auth_response": {
         if (data["status"] == "valid") {
           setReady(true);
-        } else if (data["status"] == "token_invalid") {
+        }
+        
+        else if (data["status"] == "token_invalid") {
           final refreshToken = await secureStorage.getToken("refreshToken");
           if (refreshToken.isEmpty) {
             showAnimatedSnackbarGlobal(
@@ -229,9 +237,11 @@ class WebSocketService {
 
           _sendDirect(jsonEncode({
             "header": "refresh",
-            "body": {"userId": userId, "token": refreshToken},
+            "body": { "userId": userId, "token": refreshToken },
           }));
-        } else if (data["status"] == "user_invalid") {
+        }
+        
+        else if (data["status"] == "user_invalid") {
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
@@ -250,11 +260,14 @@ class WebSocketService {
         if (data["status"] == "valid") {
           final newAuthToken = data["body"]["authToken"];
           await secureStorage.saveToken("authToken", newAuthToken);
+
           _sendDirect(jsonEncode({
             "header": "auth",
-            "body": {"userId": userId, "token": newAuthToken},
+            "body": { "userId": userId, "token": newAuthToken },
           }));
-        } else if (data["status"] == "user_invalid") {
+        }
+        
+        else if (data["status"] == "user_invalid") {
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
@@ -305,6 +318,34 @@ class WebSocketService {
     _reconnectTimer = null;
   }
 
+  void refreshForAction(Map<String, dynamic> action) async {
+    final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
+
+    setReady(false);
+    sendMessage(jsonEncode(action));
+
+    final String userId       = await secureStorage.getToken("userId");
+    final String refreshToken = await secureStorage.getToken("refreshToken");
+
+    if (refreshToken.isEmpty) {
+      showAnimatedSnackbarGlobal(
+        icon: Icons.error_outline_rounded,
+        color1: theme.warning.shade500!,
+        color2: theme.warning.shade400!,
+        title: "Refresh-Token nicht gefunden",
+        heightOffset: 50,
+      );
+
+      signout();
+      return;
+    }
+
+    _sendDirect(jsonEncode({
+      "header": "refresh",
+      "body": { "userId": userId, "token": refreshToken },
+    }));
+  }
+
   Future<void> sendMessage(String message) async {
     if (_forceClosed) {
       final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
@@ -331,10 +372,14 @@ class WebSocketService {
     _sendDirect(message);
   }
 
-  Future<void> _sendDirect(String message) async {
+  Future<void> _sendDirect(String raw) async {
     if (_socket == null || !_connected) return;
 
     try {
+      final Map<String, dynamic> msg = jsonDecode(raw);
+      msg["authToken"] = await secureStorage.getToken("authToken");
+      final String message = jsonEncode(msg);
+
       final encrypted = await encryptAES(_sessionKey!, message);
       final data = jsonEncode({
         "type": "enc",
@@ -345,7 +390,9 @@ class WebSocketService {
 
       debugPrint('[WebSocket] Sending message: $message');
       _socket!.add(data);
-    } catch (e) {
+    }
+    
+    catch (e) {
       final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
       
       showAnimatedSnackbarGlobal(

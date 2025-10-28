@@ -3,6 +3,8 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:hazelnut/main.dart";
 import "package:hazelnut/theme.dart";
+import "package:hazelnut/utils.dart";
+import "package:hazelnut/utils/snackbar_utils.dart";
 import "package:hazelnut/utils/websocket_service.dart";
 import "package:hazelnut/utils/loading_provider.dart";
 import "package:hazelnut/utils/event_provider.dart";
@@ -25,42 +27,24 @@ class _SetupPage3State extends ConsumerState<SetupPage3> {
     if (!context.mounted) return;
 
     if (widget.username == "") {
-      rootScaffoldMessengerKey.currentState?.showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          dismissDirection: DismissDirection.up,
-          margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 110, left: 15, right: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7),
-          ),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Icon(Icons.error_outline_rounded, color: theme.warning.shade400),
-              Text(
-                'Der Username ist noch nicht gesetzt!',
-                style: TextStyle(
-                  color: theme.warning.shade500,
-                  fontFamily: "Space Grotesk"
-                ),
-                textAlign: TextAlign.center
-              ),
-            ],
-          ),
-          duration: Duration(seconds: 5),
-          backgroundColor: theme.background.shade700,
-        ),
+      showAnimatedSnackbarGlobal(
+        icon: Icons.error_outline_rounded,
+        color1: theme.warning.shade500!,
+        color2: theme.warning.shade400!,
+        title: "Der Username ist noch nicht gesetzt!",
+        heightOffset: 50,
       );
-
-      return;
     }
+
+    final safeUsername = sanitizeRawInput(widget.username, maxLength: 30);
     
     ref.read(loadingServiceProvider).show();
+    await Future.delayed(Duration.zero);
 
     Map<String, dynamic> request = {
       "header": "registration",
       "body": {
-        "username": widget.username.toString(),
+        "username": safeUsername.toString(),
         "fcmToken": fcmToken.toString(),
       }
     };
