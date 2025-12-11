@@ -34,6 +34,8 @@ dependencies:
   flutter_riverpod: ^3.0.3
   flutter_local_notifications: ^19.4.2
   crypto: ^3.0.6
+  oqs: ^1.0.3
+  ffi: ^2.0.0
 
 dev_dependencies:
   flutter_test:

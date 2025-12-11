@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut/components/notification_icon.dart';
 import 'package:hazelnut/pages/chat_screen.dart';
 import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/chat_provider.dart';
@@ -168,6 +169,7 @@ class _ChatListOrPlaceholderState extends ConsumerState<ChatListOrPlaceholder> {
                               ),
                             ),
                           ),
+                          NotificationsReceivedIcon(chatId: chat.chatId),
                         ],
                       ),
                     ),

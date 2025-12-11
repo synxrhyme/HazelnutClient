@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hazelnut/main.dart';
 import 'package:hazelnut/utils/loading_provider.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
 import 'package:hazelnut/theme.dart';
@@ -136,7 +135,6 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                           ref.read(loadingServiceProvider).show();
                           await Future.delayed(Duration.zero);
     
-                          final String userId    = await secureStorage.getToken("userId");
                           final String chatName  = chatNameController.text.toString();
                           final String chatAuth  = chatAuthController.text.toString();
                           final String timestamp = DateTime.now().toUtc().toIso8601String();
@@ -144,7 +142,6 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                           Map<String, dynamic> request = {
                             "header": "create_chat",
                             "body": {
-                              "userId":    userId,
                               "chatName":  chatName,
                               "chatAuth":  chatAuth,
                               "timestamp": timestamp

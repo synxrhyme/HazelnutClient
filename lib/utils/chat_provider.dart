@@ -9,7 +9,7 @@ class ChatProvider extends ChangeNotifier {
 
   factory ChatProvider() {
     return _instance;
-  } 
+  }
 
   List<ChatModel> _chats = [];
   List<ChatModel> get chats => _chats;

@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/pages/home_page.dart';
 import 'package:hazelnut/theme.dart';
@@ -44,6 +45,7 @@ Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
 
   final int newCount = prevCount + 1;
   await PreferencesUtils().setInt(key, newCount);
+  rebuildNotificationNumberTrigger.value++;
 
   await flutterLocalNotificationsPlugin.show(
     chatId,
@@ -160,8 +162,74 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
       break;
     }
 
+    case "sync_messages_response": {
+      switch (data["statusCode"]) {
+        case 1: {
+          if (await PreferencesUtils().getBool("setupComplete") ?? false) return;
+
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
+            title: "Falscher User",
+            heightOffset: 50,
+          );
+
+          signout();
+          break;
+        }
+
+        case 2: {
+          if (await PreferencesUtils().getBool("setupComplete") ?? false) return;
+
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
+            title: "User nicht bekannt",
+            heightOffset: 50,
+          );
+
+          signout();
+          return;
+        }
+
+        case 3: {
+          WebSocketService().refreshForAction(data["action"]);
+          return;
+        }
+
+        case 0: {
+          if (data["messages"] == null || data["messages"]?.isEmpty ) return;
+
+          /*
+          
+          final List<dynamic> messagesJson = data["messages"];
+          final List<MessageModel> messages = messagesJson.map((msgJson) => MessageModel.fromJson(msgJson)).toList();
+          
+          
+          for (final message in messages) {
+            final bool exists = await DatabaseService().messageExists(message.messageId);
+
+            if (!exists) {
+              ref.read(messageProvider).addMessage(message, false);
+              debugPrint("adding message ${message.toString()}");
+            }
+          }
+
+          ref.read(messageProvider).loadAll();
+
+          */
+          
+          break;
+        }
+      }
+
+      break;
+    }
+
     case "chat_creation_response": {
-      switch (data["status_code"]) {
+      switch (data["statusCode"]) {
         case 0: {
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
@@ -196,6 +264,19 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
+            title: "Falscher User",
+            heightOffset: 50,
+          );
+
+          signout();
+          break;
+        }
+
+        case 4: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
             title: "Nutzer nicht bekannt",
             heightOffset: 50,
           );
@@ -212,12 +293,12 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
     case "join_response": {
       debugPrint(data.toString());
       
-      switch (data["status_code"]) {
+      switch (data["statusCode"]) {
         case 0: {
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
-            color2: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
             title: "Kein Chatroom gefunden",
             heightOffset: 50,
           );
@@ -229,7 +310,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
-            color2: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
             title: "Falsches Passwort",
             heightOffset: 50,
           );
@@ -281,7 +362,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
-            color2: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
             title: "Falscher User",
             heightOffset: 50,
           );
@@ -294,7 +375,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
-            color2: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
             title: "User nicht bekannt",
             heightOffset: 50,
           );
@@ -313,32 +394,72 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
     }
 
     case "message_response": {
-      await DatabaseService().messageDb.update(
-        "messages",
-        {
-          "messageId": data["body"]["newMessageId"],
-          "pending": 0,
-        },
-        where: "uId = ?",
-        whereArgs: [data["body"]["uId"]]
-      );
+      switch (data["statusCode"]) {
+        case 1: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
+            title: "Falscher User",
+            heightOffset: 50,
+          );
 
-      ref.read(messageProvider).loadAll();
+          break;
+        }
+
+        case 2: {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
+            title: "User nicht bekannt",
+            heightOffset: 50,
+          );
+
+          break;
+        }
+
+        case 3: {
+          WebSocketService().refreshForAction(data["action"]);
+          break;
+        }
+
+        case 0: {
+          await DatabaseService().messageDb.update(
+            "messages",
+            {
+              "messageId": data["body"]["newMessageId"],
+              "pending": 0,
+            },
+            where: "uId = ?",
+            whereArgs: [data["body"]["uId"]]
+          );
+
+          ref.read(messageProvider).loadAll();
+          break;
+        }
+      }
+
+      break;
+    }
+
+    case "received_message_response": {
+      if (data["statusCode"] == 1) {
+        WebSocketService().refreshForAction(data["action"]);
+      }
+
       break;
     }
 
     case "broadcast_message": {
-      final String now = DateTime.now().toUtc().toIso8601String();
-
       data["body"]["uId"] = await PreferencesUtils().getInt("lastUId") ?? 0;
       data["body"]["pending"] = 0;
-      data["body"]["receivedTimestamp"] = now;
 
       (data["body"] as Map).remove("receiversList");
       (data["body"] as Map).remove("_id");
 
       final MessageModel message = MessageModel.fromJson(data["body"]);
-      ref.read(messageProvider).addMessage(message);
+      ref.read(messageProvider).addMessage(message, true);
       
       final Map<String, dynamic> replyPayload = {
         "header": "received_message",
@@ -350,12 +471,10 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
           "messageId":         message.messageId,
           "chatId":            message.chatId,
           "text":              message.text,
-          "receivedTimestamp": now,
         }
       };
 
       WebSocketService().sendMessage(jsonEncode(replyPayload));
-
       break;
     }
   }

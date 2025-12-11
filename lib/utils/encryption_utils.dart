@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
+
+// ignore: depend_on_referenced_packages
 import 'package:cryptography/cryptography.dart' as crypto;
 
 import "package:hazelnut/utils/websocket_service.dart";

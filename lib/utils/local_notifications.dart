@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:hazelnut/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/pages/chat_screen.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
@@ -84,6 +85,7 @@ class ChatNotifications {
     final int newCount = prevCount + 1;
     await PreferencesUtils().setInt(key, newCount);
 
+    rebuildNotificationNumberTrigger.value++;
     cancelChatNotifications(chatId, false);
 
     _localNotifications.show(

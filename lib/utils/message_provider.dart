@@ -39,9 +39,9 @@ class MessageProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addMessage(MessageModel message) async {
+  Future<void> addMessage(MessageModel message, bool update) async {
     await DatabaseService().insertMessageIntoDb(message);
-    loadAll();
+    if (update) loadAll();
 
     notifyListeners();
   }

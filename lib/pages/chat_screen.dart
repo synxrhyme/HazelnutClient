@@ -63,7 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
     messageForDb["messageId"] = await DatabaseService().getLatestMessageId();
 
     WebSocketService().sendMessage(jsonEncode(message));
-    MessageProvider().addMessage(MessageModel.fromJson(messageForDb));
+    MessageProvider().addMessage(MessageModel.fromJson(messageForDb), true);
 
     _controller.clear();
   }

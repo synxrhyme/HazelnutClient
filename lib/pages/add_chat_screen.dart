@@ -137,7 +137,6 @@ class _AddChatScreenState extends State<AddChatScreen> {
                             return;
                           }
 
-                            final String userId    = await secureStorage.getToken("userId");
                             final String chatName  = chatNameController.text.toString();
                             final String chatAuth  = chatAuthController.text.toString();
                             final String timestamp = DateTime.now().toUtc().toIso8601String();
@@ -145,7 +144,6 @@ class _AddChatScreenState extends State<AddChatScreen> {
                             Map<String, dynamic> request = {
                               "header": "join_chat",
                               "body": {
-                                "userId":    userId,
                                 "chatName":  chatName,
                                 "chatAuth":  chatAuth,
                                 "timestamp": timestamp

@@ -9,6 +9,8 @@ import 'package:hazelnut/main.dart';
 import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/database_service.dart';
 import "package:hazelnut/utils/encryption_utils.dart";
+import 'package:hazelnut/utils/oqs.dart';
+import 'package:hazelnut/utils/oqs_utils.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:hazelnut/utils/signout.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
@@ -25,6 +27,8 @@ class WebSocketService {
 
   Uint8List? _sessionKey;
   Uint8List? get sessionKey => _sessionKey;
+
+  Map<String, Uint8List>? kyberKeyPair;
 
   bool _forceClosed = false;
   bool _connected = false;
@@ -90,14 +94,20 @@ class WebSocketService {
 
       final serverKey = await fetchServerKey("https://hazelnut.synxrhyme.com/public.pem");
 
-      final rawSessionKey = generateRawAesKey();
-      final encryptedKey = encryptAesKey(rawSessionKey, serverKey);
+      //final rawSessionKey = generateRawAesKey();
 
-      _sessionKey = rawSessionKey;
+      kyberKeyPair = OqsUtils().genKyberPair();
+      if (kyberKeyPair == null || kyberKeyPair!["publicKey"] == null || kyberKeyPair!["secretKey"] == null) {
+        throw Exception("Fehler bei der Kyber-Schlüsselgenerierung");
+      }
+      
+      final rsaEncryptedPublicKyberKey = encryptAesKey(kyberKeyPair!["publicKey"]!, serverKey);
+
+      //_sessionKey = rawSessionKey;
 
       final data = jsonEncode({
-        "type": "session_key",
-        "key": encryptedKey,
+        "type": "kyber_key",
+        "key": rsaEncryptedPublicKyberKey,
       });
 
       _socket!.add(data);
@@ -282,7 +292,19 @@ class WebSocketService {
         break;
       }
 
-      case "force_signout": signout();
+      case "force_signout": { 
+        signout();
+        
+        showAnimatedSnackbarGlobal(
+          icon: Icons.info_outline_rounded,
+          color1: theme.error.shade500!,
+          color2: theme.error.shade500!,
+          title: "Du wurdest abgemeldet",
+          heightOffset: 50,
+        );
+        
+        break;
+      }
 
       default:
         onMessage?.call(data, _ref);
@@ -378,6 +400,7 @@ class WebSocketService {
     try {
       final Map<String, dynamic> msg = jsonDecode(raw);
       msg["authToken"] = await secureStorage.getToken("authToken");
+      msg["userId"]    = await secureStorage.getToken("userId");
       final String message = jsonEncode(msg);
 
       final encrypted = await encryptAES(_sessionKey!, message);
