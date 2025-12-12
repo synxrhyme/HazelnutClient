@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut/components/notification_icon.dart';
@@ -90,6 +91,8 @@ Future<void> initFirebase(SecureStorageService secureStorage) async {
 Future<void> initFullServices(SecureStorageService secureStorage) async {
   await ChatNotifications().init();
 
+  await dotenv.load(fileName: ".env");
+
   WebSocketService().setUrl("wss://hazelnut.synxrhyme.com/ws/");
   await WebSocketService().connect();
   WebSocketService().onMessage = onMessage;
@@ -111,7 +114,6 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
           await secureStorage.saveToken("refreshToken", data["body"]["refreshToken"].toString());
 
           await PreferencesUtils().setBool("setupComplete", true);
-
           WebSocketService().close(false);
 
           navigatorKey.currentState?.push(

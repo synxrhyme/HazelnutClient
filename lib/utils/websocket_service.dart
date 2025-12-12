@@ -4,12 +4,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/database_service.dart';
 import "package:hazelnut/utils/encryption_utils.dart";
-import 'package:hazelnut/utils/oqs.dart';
 import 'package:hazelnut/utils/oqs_utils.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:hazelnut/utils/signout.dart';
@@ -52,7 +52,6 @@ class WebSocketService {
     _ready = value;
     if (_ready) {
       _flushQueue();
-      _startPing();
     }
   }
 
@@ -91,27 +90,21 @@ class WebSocketService {
 
       debugPrint('[WebSocket] Connected.');
       _stopReconnectLoop();
-
-      final serverKey = await fetchServerKey("https://hazelnut.synxrhyme.com/public.pem");
-
-      //final rawSessionKey = generateRawAesKey();
+      _startPing();
 
       kyberKeyPair = OqsUtils().genKyberPair();
       if (kyberKeyPair == null || kyberKeyPair!["publicKey"] == null || kyberKeyPair!["secretKey"] == null) {
         throw Exception("Fehler bei der Kyber-Schlüsselgenerierung");
       }
-      
-      final rsaEncryptedPublicKyberKey = encryptAesKey(kyberKeyPair!["publicKey"]!, serverKey);
-
-      //_sessionKey = rawSessionKey;
 
       final data = jsonEncode({
         "type": "kyber_key",
-        "key": rsaEncryptedPublicKyberKey,
+        "publicKey": base64Encode(kyberKeyPair!["publicKey"]!),
+        "id": dotenv.get("ID"),
       });
 
       _socket!.add(data);
-      debugPrint("[WebSocket] Session-Key gesendet: $data");
+      debugPrint("[WebSocket] Kyber-Key gesendet");
 
       _socket!.listen(
         _onMessage,
@@ -164,16 +157,66 @@ class WebSocketService {
     try {
       final msg = message.toString();
 
-      if (msg.contains('"type":"pong"')) {
+      if (msg.contains('"pong"')) {
         _lastPongTime = DateTime.now();
         return;
       }
 
       Map<String, dynamic> rawData = jsonDecode(msg);
-      final key = _sessionKey;
-      if (key == null) return;
+
+      if (rawData["type"] == "kyber_key_response") {
+        if (rawData["status"] != "success") {
+          throw Exception("Kyber-Schlüsselaustausch fehlgeschlagen");
+        }
+
+        final ciphertext = base64Decode(rawData["body"]["ciphertext"].toString());
+        if (OqsUtils().secretKey == null) {
+          throw Exception("Kein Kyber-Geheimschlüssel vorhanden");
+        }
+
+        final sharedSecret = OqsUtils().decapsulate(OqsUtils().secretKey!, ciphertext);
+
+        final aesKey = OqsUtils().deriveAesKey(sharedSecret);
+        if (aesKey.length != 32) {
+          throw Exception("Ungültige AES-Schlüssellänge: ${aesKey.length}");
+        }
+
+        _sessionKey = aesKey;
+
+        if (await PreferencesUtils().getBool("setupComplete") != true) {
+          debugPrint("Setup nicht abgeschlossen, Authentifizierung übersprungen");
+          setReady(true);
+          _flushQueue();
+          return;
+        }
+
+        final String userId = await secureStorage.getToken("userId");
+        final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
+
+        final authToken = await secureStorage.getToken("authToken");
+        if (authToken.isEmpty) {
+          showAnimatedSnackbarGlobal(
+            icon: Icons.error_outline_rounded,
+            color1: theme.warning.shade500!,
+            color2: theme.warning.shade400!,
+            title: "Auth-Token nicht gefunden",
+            heightOffset: 50,
+          );
+
+          signout();
+          return;
+        }
+
+        _sendDirect(jsonEncode({
+          "header": "auth",
+          "body": { "userId": userId, "token": authToken },
+        }));
+      }
 
       if (rawData["type"] == "enc") {
+        final key = _sessionKey;
+        if (key == null) return;
+
         final decrypted = await decryptAES(key, rawData);
         final data = jsonDecode(decrypted);
 
@@ -190,41 +233,6 @@ class WebSocketService {
     final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
 
     switch (data["header"]) {
-      case "session_key_response": {
-        if (data["status"] == "success") {
-          if (await PreferencesUtils().getBool("setupComplete") == false) {
-            setReady(true);
-            debugPrint("[WebSocket] Setup not complete, skipping auth. -- ready");
-            return;
-          }
-
-          final authToken = await secureStorage.getToken("authToken");
-          if (authToken.isEmpty) {
-            showAnimatedSnackbarGlobal(
-              icon: Icons.error_outline_rounded,
-              color1: theme.warning.shade500!,
-              color2: theme.warning.shade400!,
-              title: "Auth-Token nicht gefunden",
-              heightOffset: 50,
-            );
-
-            signout();
-            return;
-          }
-
-          _sendDirect(jsonEncode({
-            "header": "auth",
-            "body": { "userId": userId, "token": authToken },
-          }));
-        }
-        
-        else {
-          _socket?.close();
-        }
-
-        break;
-      }
-
       case "auth_response": {
         if (data["status"] == "valid") {
           setReady(true);

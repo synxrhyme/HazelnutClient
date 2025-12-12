@@ -1,0 +1,2 @@
+- Fix AES key probably not synchronised: "Error: Unsupported state or unable to authenticate data" beim AES decrypt stimmt tag nicht
+- Tutorial for usage: firebase setting + .env with IDkey setup

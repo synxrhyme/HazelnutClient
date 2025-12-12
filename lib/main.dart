@@ -22,6 +22,7 @@ final routeObserver = GlobalRouteObserver();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  bool initialized = false;
 
   await PreferencesUtils().init();
   await DatabaseService().init();
@@ -29,8 +30,11 @@ Future<void> main() async {
   runApp(ProviderScope(child: MyAppLifecycleHandler(child: const HazelnutApp())));
 
   WidgetsBinding.instance.addPostFrameCallback((_) async {
+    if (initialized) return;
     await initFirebase(secureStorage);
     await initFullServices(secureStorage);
+
+    initialized = true;
   });
 }
 

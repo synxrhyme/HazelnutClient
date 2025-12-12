@@ -36,6 +36,7 @@ dependencies:
   crypto: ^3.0.6
   oqs: ^1.0.3
   ffi: ^2.0.0
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -46,6 +47,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/noise.png
+    - .env
   fonts:
     - family: Space Grotesk
       fonts:

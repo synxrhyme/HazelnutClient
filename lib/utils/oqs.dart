@@ -66,11 +66,11 @@ final OqsKemKeypairDart oqsKemKeypair = liboqs
     .asFunction();
 
 final OqsKemEncapsulateDart oqsKemEncapsulate = liboqs
-    .lookup<NativeFunction<OqsKemEncapsulateNative>>('OQS_KEM_encapsulate')
+    .lookup<NativeFunction<OqsKemEncapsulateNative>>('OQS_KEM_encaps')
     .asFunction();
 
 final OqsKemDecapsulateDart oqsKemDecapsulate = liboqs
-    .lookup<NativeFunction<OqsKemDecapsulateNative>>('OQS_KEM_decapsulate')
+    .lookup<NativeFunction<OqsKemDecapsulateNative>>('OQS_KEM_decaps')
     .asFunction();
 
 final OqsKemFreeDart oqsKemFree = liboqs
