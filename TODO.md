@@ -1,2 +1,3 @@
 - Fix AES key probably not synchronised: "Error: Unsupported state or unable to authenticate data" beim AES decrypt stimmt tag nicht
+- Fix random problems with Debug disconnect + firebase multiple init -> race condition
 - Tutorial for usage: firebase setting + .env with IDkey setup

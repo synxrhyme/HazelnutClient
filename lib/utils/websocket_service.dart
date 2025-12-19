@@ -92,10 +92,13 @@ class WebSocketService {
       _stopReconnectLoop();
       _startPing();
 
-      kyberKeyPair = OqsUtils().genKyberPair();
+      kyberKeyPair = await compute(genKyberPair, null);
       if (kyberKeyPair == null || kyberKeyPair!["publicKey"] == null || kyberKeyPair!["secretKey"] == null) {
         throw Exception("Fehler bei der Kyber-Schlüsselgenerierung");
       }
+
+      OqsUtils().publicKey = kyberKeyPair!["publicKey"]!;
+      OqsUtils().secretKey = kyberKeyPair!["secretKey"]!;
 
       final data = jsonEncode({
         "type": "kyber_key",
@@ -174,13 +177,17 @@ class WebSocketService {
           throw Exception("Kein Kyber-Geheimschlüssel vorhanden");
         }
 
-        final sharedSecret = OqsUtils().decapsulate(OqsUtils().secretKey!, ciphertext);
+        debugPrint("ciphertext: ${hexToBytes(toHex(ciphertext))}");
 
-        final aesKey = OqsUtils().deriveAesKey(sharedSecret);
+        final sharedSecret = OqsUtils().decapsulate(OqsUtils().secretKey!, ciphertext);
+        debugPrint("shared Secret: ${hexToBytes(toHex(sharedSecret))}");
+
+        final aesKey = OqsUtils.deriveAesKey(Uint8List.fromList(sharedSecret), "Hazelnut-PBKDF2-Salt", 100000, 32);
         if (aesKey.length != 32) {
           throw Exception("Ungültige AES-Schlüssellänge: ${aesKey.length}");
         }
 
+        debugPrint("aes key: ${toHex(aesKey)}");
         _sessionKey = aesKey;
 
         if (await PreferencesUtils().getBool("setupComplete") != true) {
@@ -207,10 +214,12 @@ class WebSocketService {
           return;
         }
 
-        _sendDirect(jsonEncode({
-          "header": "auth",
-          "body": { "userId": userId, "token": authToken },
-        }));
+        Future.delayed(const Duration(milliseconds: 500)).then((_) {
+          _sendDirect(jsonEncode({
+            "header": "auth",
+            "body": { "userId": userId, "token": authToken },
+          }));
+        });
       }
 
       if (rawData["type"] == "enc") {
@@ -449,4 +458,20 @@ class WebSocketService {
 
     debugPrint('[WebSocket] Connection closed by user, forced: $forceClose');
   }
+}
+
+String toHex(Uint8List bytes) {
+  final sb = StringBuffer();
+  for (final b in bytes) {
+    sb.write(b.toRadixString(16).padLeft(2, '0'));
+  }
+  return sb.toString();
+}
+
+Uint8List hexToBytes(String hex) {
+  final result = Uint8List(hex.length ~/ 2);
+  for (int i = 0; i < hex.length; i += 2) {
+    result[i ~/ 2] = int.parse(hex.substring(i, i + 2), radix: 16);
+  }
+  return result;
 }
