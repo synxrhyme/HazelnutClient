@@ -3,12 +3,9 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
-
-// ignore: depend_on_referenced_packages
 import 'package:cryptography/cryptography.dart' as crypto;
-
 import "package:hazelnut/utils/websocket_service.dart";
-import "package:pointycastle/export.dart" show RSAPublicKey;
+import "package:pointycastle/export.dart" show HKDFKeyDerivator, HkdfParameters, RSAPublicKey, SHA256Digest;
 
 extension AesHelper on WebSocketService {
   Uint8List generateRawAesKey() {
@@ -23,17 +20,6 @@ extension AesHelper on WebSocketService {
     
     final parser = RSAKeyParser();
     return parser.parse(pem) as RSAPublicKey;
-  }
-
-  String encryptAesKey(Uint8List rawSessionKey, RSAPublicKey publicKey) {
-    final encrypter = Encrypter(RSA(
-      publicKey: publicKey,
-      encoding: RSAEncoding.OAEP,
-      digest: RSADigest.SHA256,
-    ));
-
-    final encrypted = encrypter.encryptBytes(rawSessionKey);
-    return encrypted.base64;
   }
 
   Future<Map<String, dynamic>> encryptAES(Uint8List key, String plaintext) async {
@@ -67,5 +53,38 @@ extension AesHelper on WebSocketService {
 
     final cleartext = await aes.decrypt(secretBox, secretKey: secretKey);
     return utf8.decode(cleartext);
+  }
+
+  Uint8List deriveAesKey(Uint8List sharedSecret, {Uint8List? salt, Uint8List? info}) {
+    final hkdf = HKDFKeyDerivator(SHA256Digest());
+
+    final actualSalt = salt ?? Uint8List(32); // 32 Nullbytes für SHA-256
+    final actualInfo = info ?? Uint8List.fromList(utf8.encode('mlkem768-hkdf-aes256gcm-v1'));
+
+    hkdf.init(HkdfParameters(
+      sharedSecret,
+      32,
+      actualSalt,
+      actualInfo,
+    ));
+
+    final output = Uint8List(32);
+    hkdf.deriveKey(null, 0, output, 0);
+    return output;
+  }
+
+  Future<bool> verifyServerCiphertextEd25519(Uint8List ciphertext, Uint8List signature, Uint8List serverPublicKeyBytes, int timestamp) async {
+    final algorithm = crypto.Ed25519();
+    final publicKey = crypto.SimplePublicKey(serverPublicKeyBytes, type: crypto.KeyPairType.ed25519);
+    
+    final message = Uint8List.fromList([
+      ...ciphertext,
+      ...utf8.encode(timestamp.toString()),
+    ]);
+
+    return await algorithm.verify(
+      message,
+      signature: crypto.Signature(signature, publicKey: publicKey),
+    );
   }
 }

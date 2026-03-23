@@ -1,9 +1,7 @@
-import "package:flutter/foundation.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:hazelnut/utils/database_service.dart";
 import "package:hazelnut/utils/life_cycle_handler.dart";
 import "package:hazelnut/utils/main_init.dart";
-import "package:hazelnut/utils/oqs.dart";
 import "package:hazelnut/utils/route_observer.dart";
 import "package:hazelnut/utils/secure_storage_service.dart";
 import "package:flutter/material.dart";
@@ -21,12 +19,10 @@ final GlobalKey<NavigatorState> navigatorKey  = GlobalKey<NavigatorState>();
 
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 final routeObserver = GlobalRouteObserver();
+bool firebaseBackgroundInitialized = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await compute(initLibOqs, null);
-  
-  bool servicesInitialized = false;
 
   await PreferencesUtils().init();
   await DatabaseService().init();
@@ -34,11 +30,8 @@ Future<void> main() async {
   runApp(ProviderScope(child: MyAppLifecycleHandler(child: const HazelnutApp())));
 
   WidgetsBinding.instance.addPostFrameCallback((_) async {
-    if (servicesInitialized == true) return;
     await initFirebase(secureStorage);
     await initFullServices(secureStorage);
-
-    servicesInitialized = true;
   });
 }
 

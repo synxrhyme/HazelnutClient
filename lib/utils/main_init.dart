@@ -84,7 +84,8 @@ Future<void> initFirebase(SecureStorageService secureStorage) async {
       }
     }
 
-    FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
+    if (!firebaseBackgroundInitialized) FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
+    firebaseBackgroundInitialized = true;
   }));
 }
 

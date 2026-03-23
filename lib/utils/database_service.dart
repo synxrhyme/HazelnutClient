@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -172,7 +171,6 @@ class DatabaseService {
 
   Future<List<UserModel>> loadAllUsers() async {
     final List<Map<String, dynamic>> maps = await userDb.query('users');
-    debugPrint("Loaded: ${maps.toString()}");
     
     return List<UserModel>.generate(maps.length, (i) {
       return UserModel.fromJson(maps[i]);

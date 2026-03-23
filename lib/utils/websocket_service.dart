@@ -2,18 +2,18 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/theme.dart';
 import 'package:hazelnut/utils/database_service.dart';
 import "package:hazelnut/utils/encryption_utils.dart";
-import 'package:hazelnut/utils/oqs_utils.dart';
 import 'package:hazelnut/utils/preferences_utils.dart';
 import 'package:hazelnut/utils/signout.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mlkem_native/mlkem_native.dart' show MLKEM768, KeyPair;
 
 class WebSocketService {
   late WidgetRef _ref;
@@ -28,7 +28,8 @@ class WebSocketService {
   Uint8List? _sessionKey;
   Uint8List? get sessionKey => _sessionKey;
 
-  Map<String, Uint8List>? kyberKeyPair;
+  MLKEM768 mlkem = MLKEM768();
+  KeyPair? keyPair;
 
   bool _forceClosed = false;
   bool _connected = false;
@@ -46,7 +47,7 @@ class WebSocketService {
   void Function(Map<String, dynamic>, WidgetRef)? onMessage;
 
   void init(WidgetRef ref) => _ref = ref;
-  void setUrl(String url) => _url = url;
+  void setUrl(String url)  => _url = url;
 
   void setReady(bool value) {
     _ready = value;
@@ -78,7 +79,6 @@ class WebSocketService {
     if (_connected || _connecting) return;
 
     _connecting = true;
-    debugPrint('[WebSocket] Connecting to $_url...');
 
     try {
       final socket = await WebSocket.connect(_url!).timeout(const Duration(seconds: 9));
@@ -92,17 +92,16 @@ class WebSocketService {
       _stopReconnectLoop();
       _startPing();
 
-      kyberKeyPair = await compute(genKyberPair, null);
-      if (kyberKeyPair == null || kyberKeyPair!["publicKey"] == null || kyberKeyPair!["secretKey"] == null) {
-        throw Exception("Fehler bei der Kyber-Schlüsselgenerierung");
-      }
+      final mlkem = MLKEM768();
+      keyPair = mlkem.generateKeyPair();
 
-      OqsUtils().publicKey = kyberKeyPair!["publicKey"]!;
-      OqsUtils().secretKey = kyberKeyPair!["secretKey"]!;
+      if (keyPair == null) {
+        throw Exception("Fehler bei der Generierung des MLKEM-Schlüsselpaares");
+      }
 
       final data = jsonEncode({
         "type": "kyber_key",
-        "publicKey": base64Encode(kyberKeyPair!["publicKey"]!),
+        "publicKey": base64Encode(keyPair!.publicKey),
         "id": dotenv.get("ID"),
       });
 
@@ -172,22 +171,22 @@ class WebSocketService {
           throw Exception("Kyber-Schlüsselaustausch fehlgeschlagen");
         }
 
-        final ciphertext = base64Decode(rawData["body"]["ciphertext"].toString());
-        if (OqsUtils().secretKey == null) {
-          throw Exception("Kein Kyber-Geheimschlüssel vorhanden");
+        final ciphertext    = base64Decode(rawData["body"]["ciphertext"].toString());
+        final authPublicKey = base64Decode(rawData["body"]["ed25519PublicKey"].toString());
+        final signature     = base64Decode(rawData["body"]["ed25519Signature"].toString());
+        final timestamp     = int.parse(rawData["body"]["timestamp"].toString());
+
+        debugPrint("auth public key: ${base64Encode(authPublicKey)}");
+        debugPrint("signature: ${base64Encode(signature)}");
+
+        final isVerified = await verifyServerCiphertextEd25519(ciphertext, signature, authPublicKey, timestamp);
+        if (isVerified == false) {
+          throw Exception("Die Signatur des Servers konnte nicht verifiziert werden");
         }
 
-        debugPrint("ciphertext: ${hexToBytes(toHex(ciphertext))}");
+        final sharedSecret = mlkem.decapsulate(ciphertext, keyPair!.secretKey);
+        final aesKey = deriveAesKey(sharedSecret);
 
-        final sharedSecret = OqsUtils().decapsulate(OqsUtils().secretKey!, ciphertext);
-        debugPrint("shared Secret: ${hexToBytes(toHex(sharedSecret))}");
-
-        final aesKey = OqsUtils.deriveAesKey(Uint8List.fromList(sharedSecret), "Hazelnut-PBKDF2-Salt", 100000, 32);
-        if (aesKey.length != 32) {
-          throw Exception("Ungültige AES-Schlüssellänge: ${aesKey.length}");
-        }
-
-        debugPrint("aes key: ${toHex(aesKey)}");
         _sessionKey = aesKey;
 
         if (await PreferencesUtils().getBool("setupComplete") != true) {
@@ -231,9 +230,8 @@ class WebSocketService {
 
         _handleDecrypted(data);
       }
-    } catch (error, stack) {
+    } catch (error) {
       debugPrint("error: $error");
-      debugPrint(stack.toString());
     }
   }
 
@@ -347,7 +345,6 @@ class WebSocketService {
     _reconnectTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
       if (_connected || _connecting || _forceClosed) return;
   
-      debugPrint('[WebSocket] Trying reconnect...');
       await connect();
     });
   }
