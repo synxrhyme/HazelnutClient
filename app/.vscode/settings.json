@@ -1,0 +1,30 @@
+{
+    "[dart]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "always"
+        }
+    },
+    "cmake.ignoreCMakeListsMissing": true,
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#7b2730",
+        "activityBar.background": "#7b2730",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#000000",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "commandCenter.border": "#e7e7e799",
+        "sash.hoverBorder": "#7b2730",
+        "statusBar.background": "#541b21",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#7b2730",
+        "statusBarItem.remoteBackground": "#541b21",
+        "statusBarItem.remoteForeground": "#e7e7e7",
+        "titleBar.activeBackground": "#541b21",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#541b2199",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "#541b21"
+}
