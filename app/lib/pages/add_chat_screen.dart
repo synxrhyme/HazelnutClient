@@ -151,7 +151,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
                             };
 
                             if (!context.mounted) return;
-                            WebSocketService().sendMessage(jsonEncode(request).toString());
+                            webSocketService().sendMessage(jsonEncode(request).toString());
                           },
                           style: ButtonStyle(
                             backgroundColor: WidgetStatePropertyAll(theme.background.shade600),

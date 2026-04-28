@@ -62,7 +62,7 @@ class _ChatScreenState extends State<ChatScreen> {
     messageForDb.remove("authToken");
     messageForDb["messageId"] = await DatabaseService().getLatestMessageId();
 
-    WebSocketService().sendMessage(jsonEncode(message));
+    webSocketService().sendMessage(jsonEncode(message));
     MessageProvider().addMessage(MessageModel.fromJson(messageForDb), true);
 
     _controller.clear();

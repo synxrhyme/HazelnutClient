@@ -94,9 +94,9 @@ Future<void> initFullServices(SecureStorageService secureStorage) async {
 
   await dotenv.load(fileName: ".env");
 
-  WebSocketService().setUrl("wss://hazelnut.synxrhyme.com/ws/");
-  await WebSocketService().connect();
-  WebSocketService().onMessage = onMessage;
+  webSocketService().setUrl("wss://hazelnut.synxrhyme.com/ws/");
+  await webSocketService().connect();
+  webSocketService().onMessage = onMessage;
 }
 
 void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
@@ -115,7 +115,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
           await secureStorage.saveToken("refreshToken", data["body"]["refreshToken"].toString());
 
           await PreferencesUtils().setBool("setupComplete", true);
-          WebSocketService().close(false);
+          webSocketService().close(false);
 
           navigatorKey.currentState?.push(
             PageRouteBuilder(
@@ -198,7 +198,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
         }
 
         case 3: {
-          WebSocketService().refreshForAction(data["action"]);
+          webSocketService().refreshForAction(data["action"]);
           return;
         }
 
@@ -258,7 +258,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
         }
 
         case 2: {
-          WebSocketService().refreshForAction(data["action"]);
+          webSocketService().refreshForAction(data["action"]);
           return;
         }
 
@@ -388,7 +388,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
         }
 
         case 6: {
-          WebSocketService().refreshForAction(data["action"]);
+          webSocketService().refreshForAction(data["action"]);
           break;
         }
       }
@@ -425,7 +425,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
         }
 
         case 3: {
-          WebSocketService().refreshForAction(data["action"]);
+          webSocketService().refreshForAction(data["action"]);
           break;
         }
 
@@ -450,7 +450,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
 
     case "received_message_response": {
       if (data["statusCode"] == 1) {
-        WebSocketService().refreshForAction(data["action"]);
+        webSocketService().refreshForAction(data["action"]);
       }
 
       else if (data["statusCode"] == 2) {
@@ -492,7 +492,7 @@ void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
         }
       };
 
-      WebSocketService().sendMessage(jsonEncode(replyPayload));
+      webSocketService().sendMessage(jsonEncode(replyPayload));
       break;
     }
   }

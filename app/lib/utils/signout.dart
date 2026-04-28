@@ -38,11 +38,11 @@ void signout() async {
     )
   );
 
-  WebSocketService().setReady(false);
+  webSocketService().setReady(false);
   DatabaseService().clearAll();
 
   ChatProvider().loadChats();
   MessageProvider().loadAll();
 
-  WebSocketService().close(false);
+  webSocketService().close(false);
 }

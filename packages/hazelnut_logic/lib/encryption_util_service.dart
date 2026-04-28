@@ -4,10 +4,10 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
 import 'package:cryptography/cryptography.dart' as crypto;
-import "package:hazelnut/utils/websocket_service.dart";
+import 'package:hazelnut_logic/websocket_service.dart';
 import "package:pointycastle/export.dart" show HKDFKeyDerivator, HkdfParameters, RSAPublicKey, SHA256Digest;
 
-extension AesHelper on webSocketService {
+extension AesHelper on WebSocketServiceImpl {
   Uint8List generateRawAesKey() {
     final rnd = Random.secure();
     return Uint8List.fromList(List<int>.generate(32, (_) => rnd.nextInt(256)));

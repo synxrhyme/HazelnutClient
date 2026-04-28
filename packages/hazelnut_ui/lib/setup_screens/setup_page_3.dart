@@ -11,7 +11,7 @@ import "package:hazelnut/utils/event_provider.dart";
 
 class SetupPage3 extends ConsumerStatefulWidget {
   final String username;
-  SetupPage3({super.key, required this.username});
+  const SetupPage3({super.key, required this.username});
 
   @override
   ConsumerState<SetupPage3> createState() => _SetupPage3State();

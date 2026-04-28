@@ -16,12 +16,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mlkem_native/mlkem_native.dart' show KeyPair, MLKEM768;
 
-class WebSocketService {
+class webSocketService {
   late WidgetRef _ref;
 
-  WebSocketService._internal();
-  static final WebSocketService _instance = WebSocketService._internal();
-  factory WebSocketService() => _instance;
+  webSocketService._internal();
+  static final webSocketService _instance = webSocketService._internal();
+  factory webSocketService() => _instance;
 
   WebSocket? _socket;
   String? _url;
@@ -41,7 +41,7 @@ class WebSocketService {
 
   bool showingError = false;
 
-  final Queue<String> _messageQueue = Queue<String>();
+  Queue<String> _messageQueue = Queue<String>();
   bool _ready = false;
   Timer? _reconnectTimer;
   Timer? _pingTimer;

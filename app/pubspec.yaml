@@ -10,11 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  ui:
+  hazelnut_ui:
     path: ../packages/hazelnut_ui
-  shared:
+  hazelnut_shared:
     path: ../packages/hazelnut_shared
-  logic:
+  hazelnut_logic:
     path: ../packages/hazelnut_logic
   english_words: ^4.0.0
   provider: ^6.1.5

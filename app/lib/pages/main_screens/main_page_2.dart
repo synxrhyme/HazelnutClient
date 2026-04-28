@@ -149,7 +149,7 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                           };
     
                           if (!context.mounted) return;
-                          WebSocketService().sendMessage(jsonEncode(request).toString());
+                          webSocketService().sendMessage(jsonEncode(request).toString());
 
                           chatNameController.clear();
                           chatAuthController.clear();
