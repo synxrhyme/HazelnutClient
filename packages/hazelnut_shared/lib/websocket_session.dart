@@ -1,4 +1,4 @@
-abstract class WebsocketSession {
+abstract class WebSocketSession {
   void setUrl(String url);
   Future<void> Function(String message)? onMessage;
 

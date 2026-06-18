@@ -6,9 +6,9 @@ import "package:hazelnut/utils/main_init.dart";
 import "package:hazelnut/utils/route_observer.dart";
 import "package:hazelnut/utils/secure_storage_service.dart";
 import "package:hazelnut/utils/snackbar_utils.dart";
+import "package:hazelnut/utils/websocket_service_bridge.dart";
 import "package:flutter/material.dart";
 import "package:hazelnut/theme.dart";
-import "package:hazelnut/utils/websocket_service.dart";
 import "package:hazelnut/utils/loading_provider.dart";
 import "package:hazelnut/utils/event_provider.dart";
 import "package:hazelnut/utils/preferences_utils.dart";
@@ -26,6 +26,8 @@ bool firebaseBackgroundInitialized = false;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dependencies = await createDependencies();
+
+  initializeWebSocketBridge(dependencies);
 
   await PreferencesUtils().init();
   await DatabaseService().init();
@@ -92,7 +94,6 @@ class HazelnutApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loadingService = ref.watch(loadingServiceProvider);
-    webSocketService().init(ref);
 
     return MaterialApp(
       scaffoldMessengerKey: rootScaffoldMessengerKey,

@@ -5,7 +5,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/pages/home_page.dart';
@@ -99,7 +98,7 @@ Future<void> initFullServices(SecureStorageService secureStorage) async {
   webSocketService().onMessage = onMessage;
 }
 
-void onMessage(Map<String, dynamic> data, WidgetRef ref) async {
+void onMessage(Map<String, dynamic> data, dynamic ref) async {
   debugPrint(data.toString());
   final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
   

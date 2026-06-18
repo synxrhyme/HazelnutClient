@@ -1,31 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
-import 'package:encrypt/encrypt.dart';
 import 'package:cryptography/cryptography.dart' as crypto;
-import "package:hazelnut/utils/websocket_service.dart";
-import "package:pointycastle/export.dart" show HKDFKeyDerivator, HkdfParameters, RSAPublicKey, SHA256Digest;
+import 'package:hazelnut_shared/crypto_service.dart';
+import 'package:pointycastle/export.dart' show HKDFKeyDerivator, HkdfParameters, SHA256Digest;
 
-extension AesHelper on webSocketService {
-  Uint8List generateRawAesKey() {
-    final rnd = Random.secure();
-    return Uint8List.fromList(List<int>.generate(32, (_) => rnd.nextInt(256)));
-  }
-
-  Future<RSAPublicKey> fetchServerKey(String url) async {
-    final res = await HttpClient().getUrl(Uri.parse(url));
-    final response = await res.close();
-    final pem = await response.transform(utf8.decoder).join();
-    
-    final parser = RSAKeyParser();
-    return parser.parse(pem) as RSAPublicKey;
-  }
-
+class CryptoServiceImpl implements CryptoService {
+  @override
   Future<Map<String, dynamic>> encryptAES(Uint8List key, String plaintext) async {
     final aes = crypto.AesGcm.with256bits();
     final secretKey = crypto.SecretKey(key);
-
     final nonce = aes.newNonce();
 
     final secretBox = await aes.encrypt(
@@ -41,6 +24,7 @@ extension AesHelper on webSocketService {
     };
   }
 
+  @override
   Future<String> decryptAES(Uint8List key, Map<String, dynamic> payload) async {
     final aes = crypto.AesGcm.with256bits();
     final secretKey = crypto.SecretKey(key);
@@ -55,10 +39,11 @@ extension AesHelper on webSocketService {
     return utf8.decode(cleartext);
   }
 
+  @override
   Uint8List deriveAesKey(Uint8List sharedSecret, {Uint8List? salt, Uint8List? info}) {
     final hkdf = HKDFKeyDerivator(SHA256Digest());
 
-    final actualSalt = salt ?? Uint8List(32); // 32 Nullbytes für SHA-256
+    final actualSalt = salt ?? Uint8List(32);
     final actualInfo = info ?? Uint8List.fromList(utf8.encode('mlkem768-hkdf-aes256gcm-v1'));
 
     hkdf.init(HkdfParameters(
@@ -73,10 +58,16 @@ extension AesHelper on webSocketService {
     return output;
   }
 
-  Future<bool> verifyServerCiphertextEd25519(Uint8List ciphertext, Uint8List signature, Uint8List serverPublicKeyBytes, int timestamp) async {
+  @override
+  Future<bool> verifyServerSignature(
+    Uint8List ciphertext,
+    Uint8List signature,
+    Uint8List serverPubKey,
+    int timestamp,
+  ) async {
     final algorithm = crypto.Ed25519();
-    final publicKey = crypto.SimplePublicKey(serverPublicKeyBytes, type: crypto.KeyPairType.ed25519);
-    
+    final publicKey = crypto.SimplePublicKey(serverPubKey, type: crypto.KeyPairType.ed25519);
+
     final message = Uint8List.fromList([
       ...ciphertext,
       ...utf8.encode(timestamp.toString()),
