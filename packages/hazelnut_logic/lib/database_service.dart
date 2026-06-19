@@ -4,32 +4,25 @@ import 'package:hazelnut_shared/database_service.dart';
 import 'package:hazelnut_shared/models.dart';
 import 'package:hazelnut_shared/preferences_service.dart';
 
-class DatabaseServiceImpl extends DatabaseService {
+class DatabaseServiceImpl implements DatabaseService {
+  DatabaseServiceImpl._(this._preferences, this.chatDb, this.messageDb, this.userDb);
+
+  final PreferencesService _preferences;
+
   final Database chatDb;
   final Database messageDb;
   final Database userDb;
-  final PreferencesService preferences;
 
-  DatabaseServiceImpl._(
-    this.chatDb,
-    this.messageDb,
-    this.userDb,
-    this.preferences,
-  );
-
-  static Future<DatabaseServiceImpl> create({
-    required PreferencesService preferences,
-  }) async {
+  static Future<DatabaseServiceImpl> create({required PreferencesService preferences}) async {
     final chatDb = await _initChatDB();
     final messageDb = await _initMessageDB();
     final userDb = await _initUserDB();
+    return DatabaseServiceImpl._(preferences, chatDb, messageDb, userDb);
+  }
 
-    return DatabaseServiceImpl._(
-      chatDb,
-      messageDb,
-      userDb,
-      preferences,
-    );
+  @override
+  Future<void> init() async {
+    // Datenbanken sind bereits in create() initialisiert.
   }
 
   static Future<Database> _initChatDB() async {
@@ -48,7 +41,6 @@ class DatabaseServiceImpl extends DatabaseService {
             "createdTimestamp TEXT"
           ")",
         );
-
         await db.execute(
           "CREATE TABLE chat_users("
             "chatId INTEGER,"
@@ -108,8 +100,8 @@ class DatabaseServiceImpl extends DatabaseService {
 
   @override
   Future<void> insertMessageIntoDb(MessageModel message) async {
-    final int lastUId = (await preferences.getInt("lastUId")) ?? 0;
-    await preferences.setInt("lastUId", lastUId + 1);
+    final int lastUId = await _preferences.getInt("lastUId") ?? 0;
+    await _preferences.setInt("lastUId", lastUId + 1);
     await messageDb.insert('messages', message.exportJson());
   }
 
@@ -166,7 +158,6 @@ class DatabaseServiceImpl extends DatabaseService {
       where: 'chatId = ?',
       whereArgs: [chatId],
     );
-
     return List<MessageModel>.generate(mappedMessages.length, (index) {
       return MessageModel.fromJson(mappedMessages[index]);
     });
@@ -178,7 +169,6 @@ class DatabaseServiceImpl extends DatabaseService {
       'messages',
       orderBy: 'messageId DESC',
     );
-
     final latestId = result.isNotEmpty ? result.first['messageId'] as int : 0;
     return latestId;
   }
@@ -186,7 +176,6 @@ class DatabaseServiceImpl extends DatabaseService {
   @override
   Future<List<UserModel>> loadAllUsers() async {
     final List<Map<String, dynamic>> maps = await userDb.query('users');
-    
     return List<UserModel>.generate(maps.length, (i) {
       return UserModel.fromJson(maps[i]);
     });
@@ -199,16 +188,14 @@ class DatabaseServiceImpl extends DatabaseService {
       where: 'pending = ?',
       whereArgs: [1],
     );
-
     if (mappedMessages.isEmpty) return null;
-
     return List<MessageModel>.generate(mappedMessages.length, (index) {
       return MessageModel.fromJson(mappedMessages[index]);
     });
   }
 
   @override
-  void clearAll() async {
+  Future<void> clearAll() async {
     await chatDb.delete("chats");
     await chatDb.delete("chat_users");
     await messageDb.delete("messages");

@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:hazelnut/components/notification_icon.dart';
+import 'package:hazelnut_ui/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
-import 'package:hazelnut/pages/chat_screen.dart';
+import 'package:hazelnut_ui/pages/chat_screen.dart';
 import 'package:hazelnut_shared/preferences_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatNotifications {
-  ChatNotifications._internal();
-  static final ChatNotifications _instance = ChatNotifications._internal();
-  factory ChatNotifications() => _instance;
+  ChatNotifications(this.preferencesService);
 
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final PreferencesService preferencesService;
 
   bool _initialized = false;
   int? currentChatId;
@@ -28,7 +27,7 @@ class ChatNotifications {
 
     FirebaseMessaging.onMessage.listen(_handleMessage);
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print("User tapped a notification: ${message.data}");
+      debugPrint("User tapped a notification: ${message.data}");
       final int chatId = int.parse(message.data["chatId"]);
 
       navigatorKey.currentState?.push(
@@ -76,14 +75,14 @@ class ChatNotifications {
       return;
     }
 
-    await PreferencesService().reload();
+    await preferencesService.reload();
     final String key = "chat_$chatId";
 
-    final int? prevCount = await PreferencesService().getInt(key);
+    final int? prevCount = await preferencesService.getInt(key);
     if (prevCount == null) return;
     
     final int newCount = prevCount + 1;
-    await PreferencesService().setInt(key, newCount);
+    await preferencesService.setInt(key, newCount);
 
     rebuildNotificationNumberTrigger.value++;
     cancelChatNotifications(chatId, false);

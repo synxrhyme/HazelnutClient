@@ -5,27 +5,7 @@ import 'package:hazelnut_logic/websocket_service.dart';
 import 'package:hazelnut_logic/websocket_bus.dart';
 import 'package:hazelnut_logic/websocket_handshake.dart';
 import 'package:hazelnut_logic/crypto_service.dart';
-import 'package:hazelnut_shared/database_service.dart';
-import 'package:hazelnut_shared/preferences_service.dart';
-import 'package:hazelnut_shared/secure_storage_service.dart';
-import 'package:hazelnut_shared/websocket_service.dart' as ws_interface;
-import 'package:hazelnut_shared/websocket_bus.dart' as ws_bus_interface;
-
-class AppDependencies {
-  final SecureStorageService secureStorageService;
-  final PreferencesService prefsService;
-  final DatabaseService databaseService;
-  final ws_interface.WebSocketService webSocketService;
-  final ws_bus_interface.WebSocketBus webSocketBus;
-
-  AppDependencies({
-    required this.secureStorageService,
-    required this.prefsService,
-    required this.databaseService,
-    required this.webSocketService,
-    required this.webSocketBus,
-  });
-}
+import 'package:hazelnut_shared/app_dependencies.dart';
 
 Future<AppDependencies> createDependencies() async {
   final secureStorageService = SecureStorageServiceImpl();
@@ -37,6 +17,10 @@ Future<AppDependencies> createDependencies() async {
   final handshake = WebSocketHandshakeImpl(
     cryptoService: cryptoService,
   );
+
+  //final MessageProvider messageProvider = MessageProvider();
+  //final ChatProvider chatProvider = ChatProvider();
+  //final UserProvider userProvider = UserProviderImpl.create();
 
   final webSocketService = WebSocketServiceImpl(
     webSocketBus: webSocketBus,
@@ -53,5 +37,7 @@ Future<AppDependencies> createDependencies() async {
     databaseService: databaseService,
     webSocketService: webSocketService,
     webSocketBus: webSocketBus,
+   //messageProvider: messageProvider,
+   //chatProvider: chatProvider,
   );
 }

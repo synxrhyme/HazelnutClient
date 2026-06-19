@@ -1,29 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hazelnut/components/navbar_item.dart';
-import 'package:hazelnut/main.dart';
-import 'package:hazelnut/utils/message_provider.dart';
-import "package:hazelnut/theme.dart";
-import "package:hazelnut/pages/main_screens/main_page_1.dart";
-import "package:hazelnut/pages/main_screens/main_page_2.dart";
-import "package:hazelnut/pages/main_screens/main_page_3.dart";
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_logic/message_provider.dart';
+import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_shared/secure_storage_service.dart';
+import 'package:hazelnut_ui/components/navbar_item.dart';
+import "package:hazelnut_ui/pages/main_screens/main_page_1.dart";
+import "package:hazelnut_ui/pages/main_screens/main_page_2.dart";
+import "package:hazelnut_ui/pages/main_screens/main_page_3.dart";
+import 'package:hazelnut_ui/theme.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   final PageController pageController = PageController(initialPage: 0, keepPage: true);
   int selectedIndex = 0;
+
+  late final SecureStorageService secureStorage;
+  late final MessageProvider messageProvider;
 
   @override
   void initState() {
     super.initState();
+    secureStorage = ref.watch(appDependenciesProvider).secureStorageService;
+    messageProvider = ref.watch(messageProviderProvider);
 
-    MessageProvider().loadUserId(secureStorage);
+    messageProvider.loadUserId(secureStorage);
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(

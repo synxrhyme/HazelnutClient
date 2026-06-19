@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hazelnut/components/message_widget.dart';
-import 'package:hazelnut/utils/message_provider.dart';
-import 'package:hazelnut/utils/models.dart';
+import 'package:hazelnut_logic/message_provider.dart';
+import 'package:hazelnut_shared/models.dart';
+import 'package:hazelnut_ui/components/message_widget.dart';
 
 class ChatList extends ConsumerWidget {
   final int chatId;
@@ -10,7 +10,7 @@ class ChatList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final messages = ref.watch(messageProvider).messagesForChat(chatId).reversed.toList();
+    final messages = ref.watch(messageProviderProvider).messagesForChat(chatId).reversed.toList();
 
     return Container(
       color: Colors.black,

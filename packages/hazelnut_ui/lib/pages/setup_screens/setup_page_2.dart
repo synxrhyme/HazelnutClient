@@ -1,9 +1,10 @@
 import "package:flutter/material.dart";
-import "package:hazelnut/utils/secure_storage_service.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:hazelnut_shared/app_dependencies.dart";
+import "package:hazelnut_shared/secure_storage_service.dart";
+import "package:hazelnut_ui/theme.dart";
 
-import "../../theme.dart";
-
-class SetupPage2 extends StatefulWidget {
+class SetupPage2 extends ConsumerStatefulWidget {
   final void Function(bool value, String username) callback;
   final TextEditingController controller;
   final String username;
@@ -16,12 +17,12 @@ class SetupPage2 extends StatefulWidget {
   });
 
   @override
-  State<SetupPage2> createState() => _SetupPage2State();
+  ConsumerState<SetupPage2> createState() => _SetupPage2State();
 }
 
-class _SetupPage2State extends State<SetupPage2> {
-  final SecureStorageService secureStorage = SecureStorageService();
+class _SetupPage2State extends ConsumerState<SetupPage2> {
   final FocusNode _focusNode = FocusNode();
+  late final SecureStorageService secureStorage;
 
   // Anstatt setState → ValueNotifier für Counter
   final ValueNotifier<int> remainingSpace = ValueNotifier(30);
@@ -33,6 +34,8 @@ class _SetupPage2State extends State<SetupPage2> {
   @override
   void initState() {
     super.initState();
+
+    secureStorage = ref.watch(appDependenciesProvider).secureStorageService;
   }
 
   @override

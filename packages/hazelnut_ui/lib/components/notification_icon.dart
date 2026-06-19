@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hazelnut/utils/preferences_utils.dart';
+import 'package:hazelnut/main.dart';
+import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_shared/preferences_service.dart';
 
 final ValueNotifier<int> rebuildNotificationNumberTrigger = ValueNotifier(0);
 
@@ -14,11 +16,14 @@ class NotificationsReceivedIcon extends StatefulWidget {
 class _NotificationsReceivedIconState extends State<NotificationsReceivedIcon> {
   @override
   Widget build(BuildContext context) {
+    final dependencies = container.read(appDependenciesProvider);
+    final PreferencesService prefs = dependencies.prefsService;
+
     return ValueListenableBuilder(
       valueListenable: rebuildNotificationNumberTrigger,
       builder: (context, _, __) {
         return FutureBuilder(
-          future: PreferencesUtils().getInt("chat_${widget.chatId}"),
+          future: prefs.getInt("chat_${widget.chatId}"),
           builder: (context, asyncSnapshot) {
             while (asyncSnapshot.connectionState == ConnectionState.waiting) {
               return SizedBox(

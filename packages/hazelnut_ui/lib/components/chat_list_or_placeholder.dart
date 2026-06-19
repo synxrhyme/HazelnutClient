@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hazelnut/components/notification_icon.dart';
-import 'package:hazelnut/pages/chat_screen.dart';
-import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils/chat_provider.dart';
-import 'package:hazelnut/utils/message_provider.dart';
-import 'package:hazelnut/utils/models.dart';
+import 'package:hazelnut_ui/components/notification_icon.dart';
+import 'package:hazelnut_ui/pages/chat_screen.dart';
+import 'package:hazelnut_ui/theme.dart';
 
 class ChatListOrPlaceholder extends ConsumerStatefulWidget {
   const ChatListOrPlaceholder({super.key});

@@ -8,6 +8,9 @@ import "package:hazelnut/utils/snackbar_utils.dart";
 import "package:hazelnut/utils/websocket_service.dart";
 import "package:hazelnut/utils/loading_provider.dart";
 import "package:hazelnut/utils/event_provider.dart";
+import "package:hazelnut_shared/app_dependencies.dart";
+import "package:hazelnut_shared/secure_storage_service.dart";
+import "package:hazelnut_ui/theme.dart";
 
 class SetupPage3 extends ConsumerStatefulWidget {
   final String username;
@@ -18,8 +21,10 @@ class SetupPage3 extends ConsumerStatefulWidget {
 }
 
 class _SetupPage3State extends ConsumerState<SetupPage3> {
-  late EventProvider eventProvider;
-  late EventCallback registerCallback;
+  //late EventProvider eventProvider;
+  //late EventCallback registerCallback;
+
+  late final SecureStorageService secureStorage;
 
   void sendRegistration(BuildContext context, CustomColors theme) async {
     String fcmToken = await secureStorage.getToken("fcmToken");
@@ -50,12 +55,14 @@ class _SetupPage3State extends ConsumerState<SetupPage3> {
       }
     };
 
-    webSocketService().sendMessageRaw(jsonEncode(request));
+    webSocketService.sendMessageRaw(jsonEncode(request));
   }
 
   @override
   void initState() {
     super.initState();
+
+    secureStorage = ref.watch(appDependenciesProvider).secureStorageService;
   }
 
   @override

@@ -1,11 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hazelnut/components/chat_list_or_placeholder.dart';
-import 'package:hazelnut/utils/chat_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:hazelnut/pages/add_chat_screen.dart';
-import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils/models.dart';
-import 'package:hazelnut/utils/snackbar_utils.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_ui/components/chat_list_or_placeholder.dart';
+import 'package:hazelnut_ui/pages/add_chat_screen.dart';
 
 class MainPage1 extends StatefulWidget {
   const MainPage1({super.key});

@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:hazelnut/theme.dart";
+import "package:hazelnut_ui/theme.dart";
 
 class SetupPage1 extends StatefulWidget {
   const SetupPage1({ super.key });

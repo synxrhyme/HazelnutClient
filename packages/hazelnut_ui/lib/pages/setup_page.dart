@@ -1,22 +1,27 @@
 import "package:flutter/services.dart";
-import "package:hazelnut/main.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:hazelnut_shared/app_dependencies.dart";
+import "package:hazelnut_shared/secure_storage_service.dart";
+import "package:hazelnut_ui/theme.dart";
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter/material.dart';
-import "package:hazelnut/pages/setup_screens/setup_page_1.dart";
-import "package:hazelnut/pages/setup_screens/setup_page_2.dart";
-import "package:hazelnut/pages/setup_screens/setup_page_3.dart";
-import "package:hazelnut/theme.dart";
+import "package:hazelnut_ui/pages/setup_screens/setup_page_1.dart";
+import "package:hazelnut_ui/pages/setup_screens/setup_page_2.dart";
+import "package:hazelnut_ui/pages/setup_screens/setup_page_3.dart";
 
-class SetupPage extends StatefulWidget {
+class SetupPage extends ConsumerStatefulWidget {
   const SetupPage({super.key});
 
   @override
-  State<SetupPage> createState() => _SetupPage();
+  ConsumerState<SetupPage> createState() => _SetupPage();
 }
 
-class _SetupPage extends State<SetupPage> {
+class _SetupPage extends ConsumerState<SetupPage> {
   final TextEditingController usernameController = TextEditingController();
   final PageController pageController = PageController();
+
+  late final SecureStorageService secureStorage;
+
   bool onLastPage = false;
   bool onFirstPage = true;
 
@@ -34,6 +39,7 @@ class _SetupPage extends State<SetupPage> {
   @override
   void initState() {
     super.initState();
+    secureStorage = ref.watch(appDependenciesProvider).secureStorageService;
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(

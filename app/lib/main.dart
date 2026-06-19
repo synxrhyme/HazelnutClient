@@ -1,17 +1,16 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:hazelnut/deps.dart";
-import "package:hazelnut/utils/dependencies_provider.dart";
 import "package:hazelnut/utils/life_cycle_handler.dart";
 import "package:hazelnut/utils/main_init.dart";
 import "package:hazelnut/utils/route_observer.dart";
 import "package:hazelnut/utils/snackbar_utils.dart";
-import "package:hazelnut/utils/websocket_service_bridge.dart";
 import "package:flutter/material.dart";
 import "package:hazelnut/theme.dart";
 import "package:hazelnut/utils/loading_provider.dart";
 import "package:hazelnut/utils/event_provider.dart";
-import "package:hazelnut/pages/home_page.dart";
-import "package:hazelnut/pages/setup_page.dart";
+import "package:hazelnut_ui/pages/home_page.dart";
+import "package:hazelnut_ui/pages/setup_page.dart";
+import "package:hazelnut_shared/app_dependencies.dart";
 
 final EventProvider eventProviderGlobal       = EventProvider();
 final GlobalKey<NavigatorState> navigatorKey  = GlobalKey<NavigatorState>();
@@ -24,9 +23,6 @@ bool firebaseBackgroundInitialized = false;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dependencies = await createDependencies();
-
-  initializeWebSocketBridge(dependencies);
-
   bool initialized = await dependencies.prefsService.getBool("initialized") ?? false;
 
   container.updateOverrides([

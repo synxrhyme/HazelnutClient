@@ -1,36 +1,56 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:hazelnut/components/chat_list.dart';
-import 'package:hazelnut/utils.dart';
-import 'package:hazelnut/utils/database_service.dart';
-import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils/websocket_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_logic/chat_provider.dart';
+import 'package:hazelnut_logic/message_provider.dart';
+import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_shared/database_service.dart';
+import 'package:hazelnut_shared/models.dart';
+import 'package:hazelnut_shared/preferences_service.dart';
+import 'package:hazelnut_shared/secure_storage_service.dart';
+import 'package:hazelnut_shared/websocket_service.dart';
+import 'package:hazelnut_ui/components/chat_list.dart';
+import 'package:hazelnut_ui/theme.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   final int chatId;
   const ChatScreen({super.key, required this.chatId});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
-  final SecureStorageService secureStorage = SecureStorageService();
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
+
+  late final SecureStorageService secureStorage;
+  late final PreferencesService preferencesService;
+  late final DatabaseService databaseService;
+  late final WebSocketService webSocketService;
+  late final MessageProvider messageProvider;
+  late final ChatProvider chatProvider;
 
   @override
   void initState() {
     super.initState();
+    secureStorage = ref.watch(appDependenciesProvider).secureStorageService;
+    preferencesService = ref.watch(appDependenciesProvider).prefsService;
+    databaseService = ref.watch(appDependenciesProvider).databaseService;
+    webSocketService = ref.watch(appDependenciesProvider).webSocketService;
+
+    messageProvider = ref.watch(messageProviderProvider);
+    chatProvider = ref.watch(chatProviderProvider);
+
     Future.microtask(() async {
-      await MessageProvider().loadAll();
-      ChatNotifications().cancelChatNotifications(widget.chatId, true);
+      await messageProvider.loadAll();
+      //ChatNotifications().cancelChatNotifications(widget.chatId, true);
     });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Future.microtask(() async => await MessageProvider().loadAll());
+    Future.microtask(() async => await messageProvider.loadAll());
   }
 
   void _sendMessage() async {
@@ -42,7 +62,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final message = {
       "header": "new_message",
       "body": {
-        "uId":           await PreferencesUtils().getInt("lastUId") ?? 0,
+        "uId":           await preferencesService.getInt("lastUId") ?? 0,
         "pending":       1,
         "chatId":        widget.chatId,
         "text":          safeMessage.toString(),
@@ -54,10 +74,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final messageForDb = (message["body"] as Map<String, dynamic>);
     messageForDb.remove("authToken");
-    messageForDb["messageId"] = await DatabaseService().getLatestMessageId();
+    messageForDb["messageId"] = await databaseService.getLatestMessageId();
 
-    webSocketService().sendMessage(jsonEncode(message));
-    MessageProvider().addMessage(MessageModel.fromJson(messageForDb), true);
+    webSocketService.sendMessage(jsonEncode(message));
+    messageProvider.addMessage(MessageModel.fromJson(messageForDb), true);
 
     _controller.clear();
   }
@@ -66,7 +86,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<CustomColors>()!;
 
-    final List<ChatModel>  chats  = ChatProvider().chats;
+    final List<ChatModel>  chats  = chatProvider.chats;
     final ChatModel        chat   = chats[widget.chatId];
 
     return Scaffold(
@@ -226,7 +246,7 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Drawer(
           backgroundColor: theme.background.shade700,
           child: FutureBuilder(
-            future: DatabaseService().getUsersForChat(widget.chatId),
+            future: databaseService.getUsersForChat(widget.chatId),
             builder: (context, asyncSnapshot) {
               return Column(
                 children: [

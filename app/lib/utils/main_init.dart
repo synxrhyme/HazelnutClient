@@ -5,22 +5,21 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hazelnut/components/notification_icon.dart';
-import 'package:hazelnut/deps.dart';
+import 'package:hazelnut_ui/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
-import 'package:hazelnut/pages/home_page.dart';
+import 'package:hazelnut_ui/pages/home_page.dart';
 import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils/database_service.dart';
-import 'package:hazelnut/utils/dependencies_provider.dart';
 import 'package:hazelnut/utils/loading_provider.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
-import 'package:hazelnut/utils/websocket_service.dart';
+import 'package:hazelnut_logic/chat_provider.dart';
+import 'package:hazelnut_logic/message_provider.dart';
 import 'package:hazelnut_logic/preferences_service.dart';
-import 'package:hazelnut_logic/secure_storage_service.dart';
+import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_shared/database_service.dart';
 import 'package:hazelnut_shared/models.dart';
 import 'package:hazelnut_shared/preferences_service.dart';
 import 'package:hazelnut_shared/secure_storage_service.dart';
+import 'package:hazelnut_shared/websocket_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
@@ -29,7 +28,6 @@ Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
 
   WidgetsFlutterBinding.ensureInitialized();
   final prefsService = await PreferencesServiceImpl.create();
-
   final int chatId = int.parse(message.data["chatId"]);
   
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -92,13 +90,17 @@ Future<void> initFirebase(SecureStorageService secureStorage) async {
 }
 
 Future<void> initFullServices() async {
+  final dependencies = container.read(appDependenciesProvider);
+  final WebSocketService webSocketService = dependencies.webSocketService;
+  //final ChatNotifications chatNotifications = dependencies.cga;
+
   //await ChatNotifications().init();
 
   await dotenv.load(fileName: ".env");
 
-  webSocketService().setUrl("wss://hazelnut.synxrhyme.com/ws/");
-  await webSocketService().connect();
-  webSocketService().onMessage = (data) => onMessage(data);
+  webSocketService.setUrl("wss://hazelnut.synxrhyme.com/ws/");
+  await webSocketService.connect();
+  webSocketService.onMessage = (data) => onMessage(data);
 }
 
 void onMessage(Map<String, dynamic> data) async {
@@ -108,7 +110,11 @@ void onMessage(Map<String, dynamic> data) async {
   final dependencies = container.read(appDependenciesProvider);
   final SecureStorageService secureStorage = dependencies.secureStorageService;
   final PreferencesService prefs = dependencies.prefsService;
-  //final AuthService authService = dependencies.authService;
+  final DatabaseService databaseService = dependencies.databaseService;
+  final WebSocketService webSocketService = dependencies.webSocketService;
+  
+  final ChatProvider chatProvider = container.read(chatProviderProvider);
+  final MessageProvider messageProvider = container.read(messageProviderProvider);
   final LoadingService loader = container.read(loadingServiceProvider);
   
   switch (data["header"]) {
@@ -123,7 +129,7 @@ void onMessage(Map<String, dynamic> data) async {
           await secureStorage.saveToken("refreshToken", data["body"]["refreshToken"].toString());
 
           await prefs.setBool("setupComplete", true);
-          webSocketService().close(false);
+          webSocketService.close(false);
 
           navigatorKey.currentState?.push(
             PageRouteBuilder(
@@ -206,7 +212,7 @@ void onMessage(Map<String, dynamic> data) async {
         }
 
         case 3: {
-          webSocketService().refreshForAction(data["action"]);
+          webSocketService.refreshForAction(data["action"]);
           return;
         }
 
@@ -266,7 +272,7 @@ void onMessage(Map<String, dynamic> data) async {
         }
 
         case 2: {
-          webSocketService().refreshForAction(data["action"]);
+          webSocketService.refreshForAction(data["action"]);
           return;
         }
 
@@ -343,17 +349,17 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 3: {
           final ChatModel chatModel = ChatModel.fromJson(data["body"]);
-          ChatProvider().addChat(chatModel);
+          chatProvider.addChat(chatModel);
 
           final List<Map<String,dynamic>> users = List<Map<String,dynamic>>.from(data["body"]["users"]);
 
           if (users.isNotEmpty) {
             for (final Map<String,dynamic> user_ in users) {
               final UserModel user = UserModel.fromJson(user_);
-              if (user.userId != MessageProvider().userId) chatModel.addUser(user);
+              if (user.userId != messageProvider.userId) chatModel.addUser(user);
             }
 
-            ChatProvider().loadChats();
+            chatProvider.loadChats();
           }
           
           showAnimatedSnackbarGlobal(
@@ -396,7 +402,7 @@ void onMessage(Map<String, dynamic> data) async {
         }
 
         case 6: {
-          webSocketService().refreshForAction(data["action"]);
+          webSocketService.refreshForAction(data["action"]);
           break;
         }
       }
@@ -433,12 +439,12 @@ void onMessage(Map<String, dynamic> data) async {
         }
 
         case 3: {
-          webSocketService().refreshForAction(data["action"]);
+          webSocketService.refreshForAction(data["action"]);
           break;
         }
 
         case 0: {
-          await DatabaseService().messageDb.update(
+          await databaseService.messageDb.update(
             "messages",
             {
               "messageId": data["body"]["newMessageId"],
@@ -448,7 +454,7 @@ void onMessage(Map<String, dynamic> data) async {
             whereArgs: [data["body"]["uId"]]
           );
 
-          ref.read(messageProvider).loadAll();
+          messageProvider.loadAll();
           break;
         }
       }
@@ -458,7 +464,7 @@ void onMessage(Map<String, dynamic> data) async {
 
     case "received_message_response": {
       if (data["statusCode"] == 1) {
-        webSocketService().refreshForAction(data["action"]);
+        webSocketService.refreshForAction(data["action"]);
       }
 
       else if (data["statusCode"] == 2) {
@@ -485,7 +491,7 @@ void onMessage(Map<String, dynamic> data) async {
       (data["body"] as Map).remove("_id");
 
       final MessageModel message = MessageModel.fromJson(data["body"]);
-      ref.read(messageProvider).addMessage(message, true);
+      messageProvider.addMessage(message, true);
       
       final Map<String, dynamic> replyPayload = {
         "header": "received_message",
@@ -500,7 +506,7 @@ void onMessage(Map<String, dynamic> data) async {
         }
       };
 
-      webSocketService().sendMessage(jsonEncode(replyPayload));
+      webSocketService.sendMessage(jsonEncode(replyPayload));
       break;
     }
   }

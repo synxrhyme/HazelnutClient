@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:hazelnut_shared/app_dependencies.dart';
 import 'package:hazelnut_shared/database_service.dart';
 import 'package:hazelnut_shared/models.dart';
 import 'package:hazelnut_shared/secure_storage_service.dart';
-import 'package:hazelnut/main.dart';
 
 class MessageProvider extends ChangeNotifier {
-  MessageProvider._internal() { loadAll(); }
-  static final MessageProvider _instance = MessageProvider._internal();
-
-  factory MessageProvider() {
-    return _instance;
+  MessageProvider(this.secureStorage, this.databaseService) {
+    loadAll();
   }
+
+  final SecureStorageService secureStorage;
+  final DatabaseService databaseService;
 
   final Map<int, List<MessageModel>> _messagesByChat = {};
   List<MessageModel> messagesForChat(int chatId) => _messagesByChat[chatId] ?? [];
@@ -19,16 +19,13 @@ class MessageProvider extends ChangeNotifier {
   String? _userId;
   String? get userId => _userId;
 
-  final dependencies = container.read(appDependenciesProvider);
-  final SecureStorageService secureStorage = dependencies.secureStorageService;
-
   Future<void> loadUserId(SecureStorageService secureStorage) async {
     _userId = await secureStorage.getToken("userId");
     notifyListeners();
   }
 
   Future<void> loadAll() async {
-    List<ChatModel> chats = await DatabaseService().loadAllChats();
+    List<ChatModel> chats = await databaseService.loadAllChats();
 
     if (chats.isEmpty) {
       _messagesByChat.clear();
@@ -36,7 +33,7 @@ class MessageProvider extends ChangeNotifier {
     }
 
     for (ChatModel chat in chats) {
-      final loaded = await DatabaseService().loadMessagesForChat(chat.chatId);
+      final loaded = await databaseService.loadMessagesForChat(chat.chatId);
       _messagesByChat[chat.chatId] = loaded;
     }
 
@@ -44,16 +41,12 @@ class MessageProvider extends ChangeNotifier {
   }
 
   Future<void> addMessage(MessageModel message, bool update) async {
-    await DatabaseService().insertMessageIntoDb(message);
+    await databaseService.insertMessageIntoDb(message);
     if (update) loadAll();
 
     notifyListeners();
   }
 }
-
-final messageProvider = ChangeNotifierProvider<MessageProvider>((ref) {
-  return MessageProvider();
-});
 
 int stableHash(String input) {
   int hash = 0;
@@ -68,3 +61,8 @@ Color getAccentFromString(String input) {
   final hue = (hash % 360).toDouble();
   return HSLColor.fromAHSL(1, hue, 0.7, 0.6).toColor();
 }
+
+final messageProviderProvider = ChangeNotifierProvider<MessageProvider>((ref) {
+  final deps = ref.watch(appDependenciesProvider);
+  return MessageProvider(deps.secureStorageService, deps.databaseService);
+});

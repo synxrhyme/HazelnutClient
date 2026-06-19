@@ -1,21 +1,21 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:hazelnut/utils/chat_provider.dart';
-import 'package:hazelnut/utils/secure_storage_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_logic/chat_provider.dart';
+import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_shared/secure_storage_service.dart';
+import 'package:hazelnut_shared/websocket_service.dart';
+import 'package:hazelnut_ui/theme.dart';
 
-import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils/snackbar_utils.dart';
-import 'package:hazelnut/utils/websocket_service.dart';
-
-class AddChatScreen extends StatefulWidget {
-  AddChatScreen({super.key});
+class AddChatScreen extends ConsumerStatefulWidget {
+  const AddChatScreen({super.key});
 
   @override
-  State<AddChatScreen> createState() => _AddChatScreenState();
+  ConsumerState<AddChatScreen> createState() => _AddChatScreenState();
 }
 
-class _AddChatScreenState extends State<AddChatScreen> {
-  final SecureStorageService secureStorage = SecureStorageService();
+class _AddChatScreenState extends ConsumerState<AddChatScreen> {
   bool showingError = false;
 
   final FocusNode chatNameFocusNode = FocusNode();
@@ -24,16 +24,24 @@ class _AddChatScreenState extends State<AddChatScreen> {
   final TextEditingController chatNameController = TextEditingController();
   final TextEditingController chatAuthController = TextEditingController();
 
+  late final SecureStorageService secureStorage;
+  late final WebSocketService webSocketService;
+  late final ChatProvider chatProvider;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async => await ChatProvider().loadChats());
+    chatProvider = ref.watch(chatProviderProvider);
+    Future.microtask(() async => await chatProvider.loadChats());
+
+    secureStorage = ref.watch(appDependenciesProvider).secureStorageService;
+    webSocketService = ref.watch(appDependenciesProvider).webSocketService;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Future.microtask(() async => await ChatProvider().loadChats());
+    Future.microtask(() async => await chatProvider.loadChats());
   }
 
   @override
@@ -151,7 +159,7 @@ class _AddChatScreenState extends State<AddChatScreen> {
                             };
 
                             if (!context.mounted) return;
-                            webSocketService().sendMessage(jsonEncode(request).toString());
+                            webSocketService.sendMessage(jsonEncode(request).toString());
                           },
                           style: ButtonStyle(
                             backgroundColor: WidgetStatePropertyAll(theme.background.shade600),

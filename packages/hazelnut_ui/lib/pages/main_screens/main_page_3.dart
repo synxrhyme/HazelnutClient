@@ -1,28 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:hazelnut/utils/chat_provider.dart';
-import 'package:hazelnut/utils/database_service.dart';
-import 'package:hazelnut/utils/message_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_logic/chat_provider.dart';
+import 'package:hazelnut_logic/message_provider.dart';
+import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_shared/database_service.dart';
 
-class MainPage3 extends StatefulWidget {
+class MainPage3 extends ConsumerStatefulWidget {
   const MainPage3({super.key});
 
   @override
-  State<MainPage3> createState() => _MainPage3State();
+  ConsumerState<MainPage3> createState() => _MainPage3State();
 }
 
-class _MainPage3State extends State<MainPage3> {
+class _MainPage3State extends ConsumerState<MainPage3> {
   int showing = 0;
+
+  late final ChatProvider chatProvider;
+  late final MessageProvider messageProvider;
+  late final DatabaseService databaseService;
 
   @override
   void initState() {
     super.initState();
+
+    chatProvider = ref.watch(chatProviderProvider);
+    messageProvider = ref.watch(messageProviderProvider);
+    databaseService = ref.watch(appDependenciesProvider).databaseService;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Future.microtask(() async => await ChatProvider().loadChats());
-    Future.microtask(() async => await MessageProvider().loadAll());
+    Future.microtask(() async => await chatProvider.loadChats());
+    Future.microtask(() async => await messageProvider.loadAll());
   }
 
   @override
@@ -46,27 +56,27 @@ class _MainPage3State extends State<MainPage3> {
               builder: (context) {
                 switch (showing) {
                   case 0: return ListView.builder(
-                    itemCount: ChatProvider().chats.length,
+                    itemCount: chatProvider.chats.length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text(ChatProvider().chats[index].chatName),
-                        subtitle: Text("${ChatProvider().chats[index].createdByName} -- ${ChatProvider().chats[index].chatId}"),
+                        title: Text(chatProvider.chats[index].chatName),
+                        subtitle: Text("${chatProvider.chats[index].createdByName} -- ${chatProvider.chats[index].chatId}"),
                       );
                     }
                   );
 
                   case 1: return ListView.builder(
-                    itemCount: MessageProvider().messagesForChat(0).length,
+                    itemCount: messageProvider.messagesForChat(0).length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text("${MessageProvider().messagesForChat(0)[index].senderName} -- ${MessageProvider().messagesForChat(0)[index].uId.toString()}"),
-                        subtitle: Text("${MessageProvider().messagesForChat(0)[index].text} -- ${MessageProvider().messagesForChat(0)[index].sentTimestamp}"),
+                        title: Text("${messageProvider.messagesForChat(0)[index].senderName} -- ${messageProvider.messagesForChat(0)[index].uId.toString()}"),
+                        subtitle: Text("${messageProvider.messagesForChat(0)[index].text} -- ${messageProvider.messagesForChat(0)[index].sentTimestamp}"),
                       );
                     }
                   );
 
                   case 2: return FutureBuilder(
-                    future: DatabaseService().loadAllUsers(),
+                    future: databaseService.loadAllUsers(),
                     builder: (context, asyncSnapshot) {
                       while (asyncSnapshot.connectionState != ConnectionState.done) {
                         return const Center(child: CircularProgressIndicator());
