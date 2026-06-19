@@ -7,7 +7,7 @@ abstract class WebSocketService {
 
   void refreshForAction(Map<String, dynamic> action);
 
-  void Function(Map<String, dynamic>, dynamic)? onMessage;
+  void Function(Map<String, dynamic>)? onMessage;
   bool get isConnected;
 
   Future<void> sendMessage(String raw);

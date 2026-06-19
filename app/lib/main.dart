@@ -1,23 +1,21 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:hazelnut/deps.dart";
-import "package:hazelnut/utils/database_service.dart";
+import "package:hazelnut/utils/dependencies_provider.dart";
 import "package:hazelnut/utils/life_cycle_handler.dart";
 import "package:hazelnut/utils/main_init.dart";
 import "package:hazelnut/utils/route_observer.dart";
-import "package:hazelnut/utils/secure_storage_service.dart";
 import "package:hazelnut/utils/snackbar_utils.dart";
 import "package:hazelnut/utils/websocket_service_bridge.dart";
 import "package:flutter/material.dart";
 import "package:hazelnut/theme.dart";
 import "package:hazelnut/utils/loading_provider.dart";
 import "package:hazelnut/utils/event_provider.dart";
-import "package:hazelnut/utils/preferences_utils.dart";
 import "package:hazelnut/pages/home_page.dart";
 import "package:hazelnut/pages/setup_page.dart";
 
 final EventProvider eventProviderGlobal       = EventProvider();
-final SecureStorageService secureStorage      = SecureStorageService();
 final GlobalKey<NavigatorState> navigatorKey  = GlobalKey<NavigatorState>();
+final ProviderContainer container = ProviderContainer();
 
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 final routeObserver = GlobalRouteObserver();
@@ -29,25 +27,27 @@ Future<void> main() async {
 
   initializeWebSocketBridge(dependencies);
 
-  await PreferencesUtils().init();
-  await DatabaseService().init();
+  bool initialized = await dependencies.prefsService.getBool("initialized") ?? false;
 
-  bool initialized = false;
+  container.updateOverrides([
+    appDependenciesProvider.overrideWithValue(dependencies),
+  ]);
 
   runApp(
-    ProviderScope(
+    UncontrolledProviderScope(
+      container: container,
       child: MyAppLifecycleHandler(
-        child: HazelnutApp(
-          deps: dependencies
-        )
+        child: HazelnutApp()
       )
     )
   );
 
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     if (initialized) return;
+    final secureStorage = dependencies.secureStorageService;
+
     await initFirebase(secureStorage);
-    await initFullServices(secureStorage);
+    await initFullServices();
     initialized = true;
 
     // UI listener for logic-triggered snackbars
@@ -87,13 +87,12 @@ Future<void> main() async {
 }
 
 class HazelnutApp extends ConsumerWidget {
-  const HazelnutApp({super.key, required this.deps});
-
-  final AppDependencies deps;
+  const HazelnutApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loadingService = ref.watch(loadingServiceProvider);
+    final prefsService = ref.watch(appDependenciesProvider).prefsService;
 
     return MaterialApp(
       scaffoldMessengerKey: rootScaffoldMessengerKey,
@@ -106,7 +105,7 @@ class HazelnutApp extends ConsumerWidget {
       darkTheme: darkMode,
       themeMode: ThemeMode.system,
       home: FutureBuilder(
-        future: PreferencesUtils().getBool("setupComplete"),
+        future: prefsService.getBool("setupComplete"),
         builder: (context, asyncSnapshot) {
           if (!asyncSnapshot.hasData) {
             return const Center(child: CircularProgressIndicator(

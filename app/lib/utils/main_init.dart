@@ -5,26 +5,30 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut/components/notification_icon.dart';
+import 'package:hazelnut/deps.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/pages/home_page.dart';
 import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils/chat_provider.dart';
 import 'package:hazelnut/utils/database_service.dart';
+import 'package:hazelnut/utils/dependencies_provider.dart';
 import 'package:hazelnut/utils/loading_provider.dart';
-import 'package:hazelnut/utils/local_notifications.dart';
-import 'package:hazelnut/utils/message_provider.dart';
-import 'package:hazelnut/utils/models.dart';
-import 'package:hazelnut/utils/preferences_utils.dart';
-import 'package:hazelnut/utils/secure_storage_service.dart';
-import 'package:hazelnut/utils/signout.dart';
 import 'package:hazelnut/utils/snackbar_utils.dart';
 import 'package:hazelnut/utils/websocket_service.dart';
+import 'package:hazelnut_logic/preferences_service.dart';
+import 'package:hazelnut_logic/secure_storage_service.dart';
+import 'package:hazelnut_shared/models.dart';
+import 'package:hazelnut_shared/preferences_service.dart';
+import 'package:hazelnut_shared/secure_storage_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
   if (message.data["chatName"] == null || message.data["chatId"] == null) return;
   debugPrint("handling background");
+
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefsService = await PreferencesServiceImpl.create();
 
   final int chatId = int.parse(message.data["chatId"]);
   
@@ -33,18 +37,17 @@ Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
   const initSettings = InitializationSettings(android: androidInit);
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-  await PreferencesUtils().init();
-  await PreferencesUtils().reload();
+  await prefsService.reload();
   final String key = "chat_$chatId";
 
-  final int? prevCount = await PreferencesUtils().getInt(key);
+  final int? prevCount = await prefsService.getInt(key);
   if (prevCount == null) {
     debugPrint("First notification for chat $chatId, setting count to 1");
     return;
   }
 
   final int newCount = prevCount + 1;
-  await PreferencesUtils().setInt(key, newCount);
+  await prefsService.setInt(key, newCount);
   rebuildNotificationNumberTrigger.value++;
 
   await flutterLocalNotificationsPlugin.show(
@@ -88,19 +91,25 @@ Future<void> initFirebase(SecureStorageService secureStorage) async {
   }));
 }
 
-Future<void> initFullServices(SecureStorageService secureStorage) async {
-  await ChatNotifications().init();
+Future<void> initFullServices() async {
+  //await ChatNotifications().init();
 
   await dotenv.load(fileName: ".env");
 
   webSocketService().setUrl("wss://hazelnut.synxrhyme.com/ws/");
   await webSocketService().connect();
-  webSocketService().onMessage = onMessage;
+  webSocketService().onMessage = (data) => onMessage(data);
 }
 
-void onMessage(Map<String, dynamic> data, dynamic ref) async {
+void onMessage(Map<String, dynamic> data) async {
   debugPrint(data.toString());
   final theme = Theme.of(rootScaffoldMessengerKey.currentContext!).extension<CustomColors>()!;
+
+  final dependencies = container.read(appDependenciesProvider);
+  final SecureStorageService secureStorage = dependencies.secureStorageService;
+  final PreferencesService prefs = dependencies.prefsService;
+  //final AuthService authService = dependencies.authService;
+  final LoadingService loader = container.read(loadingServiceProvider);
   
   switch (data["header"]) {
     case "registration_response": {
@@ -113,7 +122,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
           await secureStorage.saveToken("authToken",    data["body"]["authToken"].toString());
           await secureStorage.saveToken("refreshToken", data["body"]["refreshToken"].toString());
 
-          await PreferencesUtils().setBool("setupComplete", true);
+          await prefs.setBool("setupComplete", true);
           webSocketService().close(false);
 
           navigatorKey.currentState?.push(
@@ -160,14 +169,14 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
         }
       }
 
-      ref.read(loadingServiceProvider).hide();
+      loader.hide();
       break;
     }
 
     case "sync_messages_response": {
       switch (data["statusCode"]) {
         case 1: {
-          if (await PreferencesUtils().getBool("setupComplete") ?? false) return;
+          if (await prefs.getBool("setupComplete") ?? false) return;
 
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
@@ -177,12 +186,12 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
             heightOffset: 50,
           );
 
-          signout();
+          //authService.signout();
           break;
         }
 
         case 2: {
-          if (await PreferencesUtils().getBool("setupComplete") ?? false) return;
+          if (await prefs.getBool("setupComplete") ?? false) return;
 
           showAnimatedSnackbarGlobal(
             icon: Icons.error_outline_rounded,
@@ -192,7 +201,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
             heightOffset: 50,
           );
 
-          signout();
+          //authService.signout();
           return;
         }
 
@@ -270,7 +279,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
             heightOffset: 50,
           );
 
-          signout();
+          //authService.signout();
           break;
         }
 
@@ -283,12 +292,12 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
             heightOffset: 50,
           );
 
-          signout();
+          //authService.signout();
           return;
         }
       }
 
-      ref.read(loadingServiceProvider).hide();
+      loader.hide();
       break;
     }
 
@@ -355,7 +364,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
             heightOffset: 50,
           );
 
-          ref.read(loadingServiceProvider).hide();
+          loader.hide();
           navigatorKey.currentState?.pop();
           break;
         }
@@ -369,7 +378,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
             heightOffset: 50,
           );
 
-          signout();
+          //authService.signout();
           break;
         }
 
@@ -382,7 +391,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
             heightOffset: 50,
           );
 
-          signout();
+          //authService.signout();
           break;
         }
 
@@ -406,7 +415,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
             heightOffset: 50,
           );
 
-          signout();
+          //authService.signout();
           break;
         }
 
@@ -419,7 +428,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
             heightOffset: 50,
           );
 
-          signout();
+          //authService.signout();
           break;
         }
 
@@ -461,7 +470,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
           heightOffset: 50,
         );
 
-        signout();
+        //authService.signout();
         break;
       }
 
@@ -469,7 +478,7 @@ void onMessage(Map<String, dynamic> data, dynamic ref) async {
     }
 
     case "broadcast_message": {
-      data["body"]["uId"] = await PreferencesUtils().getInt("lastUId") ?? 0;
+      data["body"]["uId"] = await prefs.getInt("lastUId") ?? 0;
       data["body"]["pending"] = 0;
 
       (data["body"] as Map).remove("receiversList");

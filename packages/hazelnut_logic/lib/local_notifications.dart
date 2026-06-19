@@ -4,7 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:hazelnut/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/pages/chat_screen.dart';
-import 'package:hazelnut/utils/preferences_utils.dart';
+import 'package:hazelnut_shared/preferences_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatNotifications {
@@ -76,14 +76,14 @@ class ChatNotifications {
       return;
     }
 
-    await PreferencesUtils().reload();
+    await PreferencesService().reload();
     final String key = "chat_$chatId";
 
-    final int? prevCount = await PreferencesUtils().getInt(key);
+    final int? prevCount = await PreferencesService().getInt(key);
     if (prevCount == null) return;
     
     final int newCount = prevCount + 1;
-    await PreferencesUtils().setInt(key, newCount);
+    await PreferencesService().setInt(key, newCount);
 
     rebuildNotificationNumberTrigger.value++;
     cancelChatNotifications(chatId, false);

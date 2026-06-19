@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:hazelnut/utils/database_service.dart';
-import 'package:hazelnut/utils/models.dart';
-import 'package:hazelnut/utils/secure_storage_service.dart';
+import 'package:hazelnut_shared/database_service.dart';
+import 'package:hazelnut_shared/models.dart';
+import 'package:hazelnut_shared/secure_storage_service.dart';
+import 'package:hazelnut/main.dart';
 
 class MessageProvider extends ChangeNotifier {
   MessageProvider._internal() { loadAll(); }
@@ -17,6 +18,9 @@ class MessageProvider extends ChangeNotifier {
 
   String? _userId;
   String? get userId => _userId;
+
+  final dependencies = container.read(appDependenciesProvider);
+  final SecureStorageService secureStorage = dependencies.secureStorageService;
 
   Future<void> loadUserId(SecureStorageService secureStorage) async {
     _userId = await secureStorage.getToken("userId");

@@ -7,6 +7,7 @@ import 'package:hazelnut_shared/websocket_bus.dart';
 import 'package:hazelnut_shared/websocket_service.dart';
 
 class AuthServiceImpl extends AuthService {
+  final GlobalKey<NavigatorState> navigatorKey;
   final WebSocketBus webSocketBus;
   final SecureStorageService secureStorageService;
   
@@ -37,11 +38,11 @@ class AuthServiceImpl extends AuthService {
 
   @override
   Future<void> signOut() async {
-    secureStorage.deleteToken("username");
-    secureStorage.deleteToken("userId");
+    secureStorageService.deleteToken("username");
+    secureStorageService.deleteToken("userId");
 
-    secureStorage.deleteToken("authToken");
-    secureStorage.deleteToken("refreshToken");
+    secureStorageService.deleteToken("authToken");
+    secureStorageService.deleteToken("refreshToken");
 
     await prefsService.setBool("setupComplete", false);
 
