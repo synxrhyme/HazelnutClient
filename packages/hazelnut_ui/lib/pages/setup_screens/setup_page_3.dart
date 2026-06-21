@@ -1,16 +1,13 @@
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:hazelnut/main.dart";
-import "package:hazelnut/theme.dart";
-import "package:hazelnut/utils.dart";
-import "package:hazelnut/utils/snackbar_utils.dart";
-import "package:hazelnut/utils/websocket_service.dart";
-import "package:hazelnut/utils/loading_provider.dart";
-import "package:hazelnut/utils/event_provider.dart";
+import "package:hazelnut_logic/util.dart";
 import "package:hazelnut_shared/app_dependencies.dart";
 import "package:hazelnut_shared/secure_storage_service.dart";
+import "package:hazelnut_ui/loading_provider.dart";
+import "package:hazelnut_ui/snackbar_utils.dart";
 import "package:hazelnut_ui/theme.dart";
+import "package:hazelnut_shared/navigation.dart";
 
 class SetupPage3 extends ConsumerStatefulWidget {
   final String username;
@@ -33,6 +30,7 @@ class _SetupPage3State extends ConsumerState<SetupPage3> {
 
     if (widget.username == "") {
       showAnimatedSnackbarGlobal(
+        navigatorKey: ref.read(navigatorKeyProvider),
         icon: Icons.error_outline_rounded,
         color1: theme.warning.shade500!,
         color2: theme.warning.shade400!,
@@ -55,7 +53,7 @@ class _SetupPage3State extends ConsumerState<SetupPage3> {
       }
     };
 
-    webSocketService.sendMessageRaw(jsonEncode(request));
+    ref.read(appDependenciesProvider).webSocketService.sendMessageRaw(jsonEncode(request));
   }
 
   @override

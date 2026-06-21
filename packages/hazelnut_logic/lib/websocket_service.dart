@@ -30,7 +30,7 @@ class WebSocketServiceImpl implements WebSocketService {
   });
 
   @override
-  void Function(Map<String, dynamic>, dynamic)? onMessage;
+  void Function(Map<String, dynamic>)? onMessage;
 
   WebSocket? _socket;
   String? _url;
@@ -193,7 +193,7 @@ class WebSocketServiceImpl implements WebSocketService {
       }
 
       default:
-        onMessage?.call(data, null);
+        onMessage?.call(data);
     }
   }
 

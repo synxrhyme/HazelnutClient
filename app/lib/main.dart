@@ -3,18 +3,19 @@ import "package:hazelnut/deps.dart";
 import "package:hazelnut/utils/life_cycle_handler.dart";
 import "package:hazelnut/utils/main_init.dart";
 import "package:hazelnut/utils/route_observer.dart";
-import "package:hazelnut/utils/snackbar_utils.dart";
+import "package:hazelnut_ui/snackbar_utils.dart";
 import "package:flutter/material.dart";
 import "package:hazelnut/theme.dart";
-import "package:hazelnut/utils/loading_provider.dart";
+import "package:hazelnut_ui/loading_provider.dart";
 import "package:hazelnut/utils/event_provider.dart";
 import "package:hazelnut_ui/pages/home_page.dart";
 import "package:hazelnut_ui/pages/setup_page.dart";
 import "package:hazelnut_shared/app_dependencies.dart";
+import "package:hazelnut_shared/navigation.dart";
 
-final EventProvider eventProviderGlobal       = EventProvider();
-final GlobalKey<NavigatorState> navigatorKey  = GlobalKey<NavigatorState>();
+final EventProvider eventProviderGlobal = EventProvider();
 final ProviderContainer container = ProviderContainer();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 final routeObserver = GlobalRouteObserver();
@@ -27,6 +28,7 @@ Future<void> main() async {
 
   container.updateOverrides([
     appDependenciesProvider.overrideWithValue(dependencies),
+    navigatorKeyProvider.overrideWithValue(navigatorKey),
   ]);
 
   runApp(
@@ -52,6 +54,7 @@ Future<void> main() async {
         try {
           final p = payload as Map<String, dynamic>;
           final ctx = rootScaffoldMessengerKey.currentContext;
+          
           if (ctx == null) return;
           final theme = Theme.of(ctx).extension<CustomColors>()!;
 
@@ -70,6 +73,7 @@ Future<void> main() async {
           final heightOffset = (p['heightOffset'] is num) ? (p['heightOffset'] as num).toDouble() : 50.0;
 
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: icon,
             color1: color1,
             color2: color2,
@@ -77,6 +81,22 @@ Future<void> main() async {
             heightOffset: heightOffset,
           );
         } catch (_) {}
+      });
+
+      dependencies.webSocketBus.on('USER_SIGNED_OUT').listen((_) {
+        navigatorKey.currentState?.pushAndRemoveUntil(
+          PageRouteBuilder(
+            transitionDuration: Duration(milliseconds: 500),
+            settings: RouteSettings(name: "setupPage"),
+            pageBuilder: (context, animation, secondaryAnimation) => SetupPage(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              final slide = Tween<Offset>(begin: Offset(1, 0), end: Offset.zero)
+                  .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut));
+              return SlideTransition(position: slide, child: child);
+            },
+          ),
+          (route) => false,
+        );
       });
     } catch (_) {}
   });

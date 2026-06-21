@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_logic/chat_provider.dart';
 import 'package:hazelnut_ui/components/chat_list_or_placeholder.dart';
 import 'package:hazelnut_ui/pages/add_chat_screen.dart';
+import 'package:hazelnut_ui/theme.dart';
 
-class MainPage1 extends StatefulWidget {
+class MainPage1 extends ConsumerStatefulWidget {
   const MainPage1({super.key});
 
   @override
-  State<MainPage1> createState() => _MainPage1State();
+  ConsumerState<MainPage1> createState() => _MainPage1State();
 }
 
-class _MainPage1State extends State<MainPage1> {
-  List<ChatModel> chats = ChatProvider().chats;
-
+class _MainPage1State extends ConsumerState<MainPage1> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async => await ChatProvider().loadChats());
+    Future.microtask(() async => await ref.read(chatProviderProvider).loadChats());
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Future.microtask(() async => await ChatProvider().loadChats());
+    Future.microtask(() async => await ref.read(chatProviderProvider).loadChats());
   }
 
   @override
@@ -178,13 +178,13 @@ class _MainPage1State extends State<MainPage1> {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () async {
-                                  showAnimatedSnackbarGlobal(
-                                    icon: Icons.warning,
-                                    color1: Colors.yellow,
-                                    color2: Colors.white,
-                                    title: "Test!",
-                                    heightOffset: 50,
-                                  );
+                                  //showAnimatedSnackbarGlobal(
+                                  //  icon: Icons.warning,
+                                  //  color1: Colors.yellow,
+                                  //  color2: Colors.white,
+                                  //  title: "Test!",
+                                  //  heightOffset: 50,
+                                  //);
                                 },
                                 child: SizedBox(
                                   width: 50,

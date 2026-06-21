@@ -22,6 +22,7 @@ class AuthServiceImpl extends AuthService {
     required this.prefsService,
     required this.databaseService,
     required this.webSocketService,
+    required this.navigatorKey
   });
 
   @override
@@ -40,39 +41,13 @@ class AuthServiceImpl extends AuthService {
   Future<void> signOut() async {
     secureStorageService.deleteToken("username");
     secureStorageService.deleteToken("userId");
-
     secureStorageService.deleteToken("authToken");
     secureStorageService.deleteToken("refreshToken");
 
     await prefsService.setBool("setupComplete", false);
 
-    navigatorKey.currentState?.push(
-      PageRouteBuilder(
-        transitionDuration: Duration(milliseconds: 500),
-        settings: RouteSettings(name: "setupPage"),
-        pageBuilder: (context, animation, secondaryAnimation) => SetupPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          final tween = Tween(begin: begin, end: end);
-          final curvedAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOut,
-          );
-
-          return SlideTransition(
-            position: tween.animate(curvedAnimation),
-            child: child,
-          );
-        },
-      )
-    );
-
-    webSocketService().close(false);
-    DatabaseService().clearAll();
-
-    ChatProvider().loadChats();
-    MessageProvider().loadAll();
-
+    databaseService.clearAll();
+    webSocketService.close(false);
+    webSocketBus.emit('USER_SIGNED_OUT', {});
   }
 }

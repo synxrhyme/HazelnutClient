@@ -1,17 +1,22 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:hazelnut_shared/app_dependencies.dart';
 import 'package:hazelnut_shared/database_service.dart';
 import 'package:hazelnut_shared/models.dart';
 import 'package:hazelnut_shared/secure_storage_service.dart';
+import 'package:hazelnut_shared/websocket_bus.dart';
 
 class MessageProvider extends ChangeNotifier {
-  MessageProvider(this.secureStorage, this.databaseService) {
+  MessageProvider(this.secureStorage, this.databaseService, this.webSocketBus) {
     loadAll();
+    _signOutSub = webSocketBus.on('USER_SIGNED_OUT').listen((_) => loadAll());
   }
 
   final SecureStorageService secureStorage;
   final DatabaseService databaseService;
+  final WebSocketBus webSocketBus;
+  StreamSubscription? _signOutSub;
 
   final Map<int, List<MessageModel>> _messagesByChat = {};
   List<MessageModel> messagesForChat(int chatId) => _messagesByChat[chatId] ?? [];
@@ -46,23 +51,10 @@ class MessageProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-}
 
-int stableHash(String input) {
-  int hash = 0;
-  for (int i = 0; i < input.length; i++) {
-    hash = (hash * 31 + input.codeUnitAt(i)) & 0x7fffffff;
+  @override
+  void dispose() {
+    _signOutSub?.cancel();
+    super.dispose();
   }
-  return hash;
 }
-
-Color getAccentFromString(String input) {
-  final hash = stableHash(input);
-  final hue = (hash % 360).toDouble();
-  return HSLColor.fromAHSL(1, hue, 0.7, 0.6).toColor();
-}
-
-final messageProviderProvider = ChangeNotifierProvider<MessageProvider>((ref) {
-  final deps = ref.watch(appDependenciesProvider);
-  return MessageProvider(deps.secureStorageService, deps.databaseService);
-});

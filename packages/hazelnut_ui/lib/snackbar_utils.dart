@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:hazelnut/main.dart';
 
 OverlayEntry? _currentSnackbarEntry;
 Timer? _dismissTimer;
@@ -112,6 +111,7 @@ class _AnimatedSnackbarState extends State<_AnimatedSnackbar>
 }
 
 void showAnimatedSnackbarGlobal({
+  required GlobalKey<NavigatorState> navigatorKey,
   required IconData icon,
   required Color color1,
   required Color color2,

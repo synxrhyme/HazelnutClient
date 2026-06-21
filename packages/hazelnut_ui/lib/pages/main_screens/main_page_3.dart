@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
 import 'package:hazelnut_logic/message_provider.dart';
+import 'package:hazelnut_logic/util.dart';
 import 'package:hazelnut_shared/app_dependencies.dart';
 import 'package:hazelnut_shared/database_service.dart';
 

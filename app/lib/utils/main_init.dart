@@ -5,12 +5,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hazelnut_logic/util.dart';
 import 'package:hazelnut_ui/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut_ui/pages/home_page.dart';
 import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils/loading_provider.dart';
-import 'package:hazelnut/utils/snackbar_utils.dart';
+import 'package:hazelnut_ui/loading_provider.dart';
+import 'package:hazelnut_ui/snackbar_utils.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
 import 'package:hazelnut_logic/message_provider.dart';
 import 'package:hazelnut_logic/preferences_service.dart';
@@ -152,6 +153,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case "username_taken": {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -164,6 +166,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case "app_already_registered": {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -185,6 +188,7 @@ void onMessage(Map<String, dynamic> data) async {
           if (await prefs.getBool("setupComplete") ?? false) return;
 
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -200,6 +204,7 @@ void onMessage(Map<String, dynamic> data) async {
           if (await prefs.getBool("setupComplete") ?? false) return;
 
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -249,6 +254,7 @@ void onMessage(Map<String, dynamic> data) async {
       switch (data["statusCode"]) {
         case 0: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -261,6 +267,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 1: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.check_circle_outline_rounded,
             color1 :theme.success.shade500!,
             color2 :theme.success.shade500!,
@@ -278,6 +285,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 3: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -291,6 +299,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 4: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -313,6 +322,7 @@ void onMessage(Map<String, dynamic> data) async {
       switch (data["statusCode"]) {
         case 0: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -325,6 +335,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 1: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -337,6 +348,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 2: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.info.shade500!,
             color2: theme.info.shade400!,
@@ -363,6 +375,7 @@ void onMessage(Map<String, dynamic> data) async {
           }
           
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.check_circle_outline,
             color1: theme.success.shade500!,
             color2: theme.success.shade500!,
@@ -377,6 +390,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 4: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -390,6 +404,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 5: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -414,6 +429,7 @@ void onMessage(Map<String, dynamic> data) async {
       switch (data["statusCode"]) {
         case 1: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -427,6 +443,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 2: {
           showAnimatedSnackbarGlobal(
+            navigatorKey: navigatorKey,
             icon: Icons.error_outline_rounded,
             color1: theme.warning.shade500!,
             color2: theme.warning.shade400!,
@@ -444,16 +461,7 @@ void onMessage(Map<String, dynamic> data) async {
         }
 
         case 0: {
-          await databaseService.messageDb.update(
-            "messages",
-            {
-              "messageId": data["body"]["newMessageId"],
-              "pending": 0,
-            },
-            where: "uId = ?",
-            whereArgs: [data["body"]["uId"]]
-          );
-
+          await databaseService.markMessageSent(data["body"]["uId"], data["body"]["newMessageId"]);
           messageProvider.loadAll();
           break;
         }
@@ -469,6 +477,7 @@ void onMessage(Map<String, dynamic> data) async {
 
       else if (data["statusCode"] == 2) {
         showAnimatedSnackbarGlobal(
+          navigatorKey: navigatorKey,
           icon: Icons.error_outline_rounded,
           color1: theme.warning.shade500!,
           color2: theme.warning.shade400!,

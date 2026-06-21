@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hazelnut/utils/loading_provider.dart';
-import 'package:hazelnut/utils/snackbar_utils.dart';
-import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils/websocket_service.dart';
+import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_shared/navigation.dart';
+import 'package:hazelnut_ui/loading_provider.dart';
+import 'package:hazelnut_ui/snackbar_utils.dart';
+import 'package:hazelnut_ui/theme.dart';
 
 class MainPage2 extends ConsumerStatefulWidget {
   const MainPage2({super.key});
@@ -112,6 +113,7 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                         onPressed: () async {
                           if (chatNameController.text == "") {
                             showAnimatedSnackbarGlobal(
+                              navigatorKey: ref.read(navigatorKeyProvider),
                               icon: Icons.error_outline_rounded,
                               color1: theme.info.shade500!,
                               color2: theme.info.shade400!,
@@ -123,6 +125,7 @@ class _MainPage2State extends ConsumerState<MainPage2> {
     
                           if (chatAuthController.text == "") {
                             showAnimatedSnackbarGlobal(
+                              navigatorKey: ref.read(navigatorKeyProvider),
                               icon: Icons.error_outline_rounded,
                               color1: theme.info.shade500!,
                               color2: theme.info.shade400!,
@@ -149,7 +152,7 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                           };
     
                           if (!context.mounted) return;
-                          webSocketService().sendMessage(jsonEncode(request).toString());
+                          ref.read(appDependenciesProvider).webSocketService.sendMessage(jsonEncode(request).toString());
 
                           chatNameController.clear();
                           chatAuthController.clear();

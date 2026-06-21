@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:hazelnut/main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut_shared/app_dependencies.dart';
 import 'package:hazelnut_shared/preferences_service.dart';
 
 final ValueNotifier<int> rebuildNotificationNumberTrigger = ValueNotifier(0);
 
-class NotificationsReceivedIcon extends StatefulWidget {
+class NotificationsReceivedIcon extends ConsumerStatefulWidget {
   final int chatId;
   const NotificationsReceivedIcon({super.key, required this.chatId});
 
   @override
-  State<NotificationsReceivedIcon> createState() => _NotificationsReceivedIconState();
+  ConsumerState<NotificationsReceivedIcon> createState() => _NotificationsReceivedIconState();
 }
 
-class _NotificationsReceivedIconState extends State<NotificationsReceivedIcon> {
+class _NotificationsReceivedIconState extends ConsumerState<NotificationsReceivedIcon> {
   @override
   Widget build(BuildContext context) {
-    final dependencies = container.read(appDependenciesProvider);
+    final dependencies = ref.read(appDependenciesProvider);
     final PreferencesService prefs = dependencies.prefsService;
 
     return ValueListenableBuilder(

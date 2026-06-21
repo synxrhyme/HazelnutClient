@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:hazelnut/theme.dart';
-import 'package:hazelnut/utils.dart';
-import 'package:hazelnut/utils/message_provider.dart';
-import 'package:hazelnut/utils/models.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_logic/util.dart';
+import 'package:hazelnut_shared/models.dart';
+import 'package:hazelnut_ui/theme.dart';
 
-class MessageWidget extends StatelessWidget {
+class MessageWidget extends ConsumerStatefulWidget {
   final MessageModel message;
 
-  MessageWidget({
+  const MessageWidget({
     super.key,
     required this.message
   });
 
   @override
+  ConsumerState<MessageWidget> createState() => _MessageWidgetState();
+}
+
+class _MessageWidgetState extends ConsumerState<MessageWidget> {
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<CustomColors>()!;
-    final userId = MessageProvider().userId ?? "";
-    final color = getAccentFromString(message.senderName);
+    final userId = ref.read(messageProviderProvider).userId ?? "";
+    final color = getAccentFromString(widget.message.senderName);
 
     return Container(
       width: double.infinity,
@@ -32,7 +37,7 @@ class MessageWidget extends StatelessWidget {
             radius: 18,
             backgroundColor: theme.background.shade400,
             child: Text(
-              message.senderName[0].toUpperCase(),
+              widget.message.senderName[0].toUpperCase(),
               style: TextStyle(
                 fontSize: 19,
                 color: color,
@@ -52,7 +57,7 @@ class MessageWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                         "${sanitizeRawInput(message.senderName, maxLength: 30, forDisplay: true)}${message.senderId == userId ? " (Du)" : ""}",
+                         "${sanitizeRawInput(widget.message.senderName, maxLength: 30, forDisplay: true)}${widget.message.senderId == userId ? " (Du)" : ""}",
                           style: TextStyle(
                             color: color.withAlpha(200),
                             fontFamily: "Space Grotesk",
@@ -63,7 +68,7 @@ class MessageWidget extends StatelessWidget {
                         ),
                         SizedBox(height: 3),
                         Text(
-                          sanitizeRawInput(message.text, maxLength: 65535, forDisplay: true),
+                          sanitizeRawInput(widget.message.text, maxLength: 65535, forDisplay: true),
                           softWrap: true,
                           style: TextStyle(
                             color: Theme.of(context).primaryColor.withAlpha(230),
@@ -76,7 +81,7 @@ class MessageWidget extends StatelessWidget {
                     ),
                   ),
 
-                  if (message.pending == 1)
+                  if (widget.message.pending == 1)
                   Icon(
                     Icons.pending_rounded,
                     color: Colors.grey.shade700,

@@ -92,6 +92,19 @@ class DatabaseServiceImpl implements DatabaseService {
       },
     );
   }
+  
+  @override
+  Future<void> markMessageSent(String uId, int newMessageId) async {
+    await messageDb.update(
+      "messages",
+      {
+        "messageId": newMessageId,
+        "pending": 0,
+      },
+      where: "uId = ?",
+      whereArgs: [uId]
+    );
+  }
 
   @override
   Future<void> insertChatIntoDb(ChatModel chat) async {

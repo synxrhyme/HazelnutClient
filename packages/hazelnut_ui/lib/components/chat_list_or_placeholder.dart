@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_logic/chat_provider.dart';
+import 'package:hazelnut_logic/util.dart';
+import 'package:hazelnut_shared/models.dart';
 import 'package:hazelnut_ui/components/notification_icon.dart';
 import 'package:hazelnut_ui/pages/chat_screen.dart';
 import 'package:hazelnut_ui/theme.dart';
@@ -15,7 +18,7 @@ class _ChatListOrPlaceholderState extends ConsumerState<ChatListOrPlaceholder> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<CustomColors>()!;
-    final List<ChatModel> chats = ref.watch(chatProvider).chats;
+    final List<ChatModel> chats = ref.watch(chatProviderProvider).chats;
 
     return Expanded(
       child: Container(

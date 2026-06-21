@@ -15,5 +15,7 @@ abstract class DatabaseService {
   Future<int> getLatestMessageId();
   Future<List<UserModel>> loadAllUsers();
 
+  Future<void> markMessageSent(String uId, int newMessageId);
+
   Future<void> clearAll();
 }

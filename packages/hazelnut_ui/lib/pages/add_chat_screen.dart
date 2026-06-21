@@ -4,8 +4,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
 import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_shared/navigation.dart';
 import 'package:hazelnut_shared/secure_storage_service.dart';
 import 'package:hazelnut_shared/websocket_service.dart';
+import 'package:hazelnut_ui/snackbar_utils.dart';
 import 'package:hazelnut_ui/theme.dart';
 
 class AddChatScreen extends ConsumerStatefulWidget {
@@ -125,6 +127,7 @@ class _AddChatScreenState extends ConsumerState<AddChatScreen> {
                           onPressed: () async {
                           if (chatNameController.text == "") {
                             showAnimatedSnackbarGlobal(
+                              navigatorKey: ref.read(navigatorKeyProvider),
                               color1: theme.info.shade500!,
                               color2: theme.info.shade400!,
                               icon: Icons.error_outline_rounded,
@@ -136,6 +139,7 @@ class _AddChatScreenState extends ConsumerState<AddChatScreen> {
     
                           if (chatAuthController.text == "") {
                             showAnimatedSnackbarGlobal(
+                              navigatorKey: ref.read(navigatorKeyProvider),
                               color1: theme.info.shade500!,
                               color2: theme.info.shade400!,
                               icon: Icons.error_outline_rounded,
