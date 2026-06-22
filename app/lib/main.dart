@@ -1,17 +1,14 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:hazelnut/deps.dart";
-import "package:hazelnut/utils/life_cycle_handler.dart";
-import "package:hazelnut/utils/main_init.dart";
-import "package:hazelnut/utils/route_observer.dart";
-import "package:hazelnut_ui/snackbar_utils.dart";
+import "package:hazelnut/init_service.dart";
+import "package:hazelnut/life_cycle_handler.dart";
+import "package:hazelnut/route_observer.dart";
 import "package:flutter/material.dart";
-import "package:hazelnut/theme.dart";
+import "package:hazelnut_logic/app_state_provider.dart";
 import "package:hazelnut_ui/loading_provider.dart";
-import "package:hazelnut/utils/event_provider.dart";
+import "package:hazelnut/event_provider.dart";
 import "package:hazelnut_ui/pages/home_page.dart";
 import "package:hazelnut_ui/pages/setup_page.dart";
-import "package:hazelnut_shared/app_dependencies.dart";
-import "package:hazelnut_shared/navigation.dart";
+import "package:hazelnut_ui/theme.dart";
 
 final EventProvider eventProviderGlobal = EventProvider();
 final ProviderContainer container = ProviderContainer();
@@ -23,83 +20,52 @@ bool firebaseBackgroundInitialized = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final dependencies = await createDependencies();
-  bool initialized = await dependencies.prefsService.getBool("initialized") ?? false;
-
-  container.updateOverrides([
-    appDependenciesProvider.overrideWithValue(dependencies),
-    navigatorKeyProvider.overrideWithValue(navigatorKey),
-  ]);
 
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: MyAppLifecycleHandler(
-        child: HazelnutApp()
-      )
-    )
+      child: const _InitWrapper(),
+    ),
   );
+}
 
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    if (initialized) return;
-    final secureStorage = dependencies.secureStorageService;
+class _InitWrapper extends StatefulWidget {
+  const _InitWrapper();
 
-    await initFirebase(secureStorage);
-    await initFullServices();
-    initialized = true;
+  @override
+  State<_InitWrapper> createState() => _InitWrapperState();
+}
 
-    // UI listener for logic-triggered snackbars
-    try {
-      dependencies.webSocketBus.on('SHOW_SNACKBAR').listen((payload) {
-        try {
-          final p = payload as Map<String, dynamic>;
-          final ctx = rootScaffoldMessengerKey.currentContext;
-          
-          if (ctx == null) return;
-          final theme = Theme.of(ctx).extension<CustomColors>()!;
+class _InitWrapperState extends State<_InitWrapper> {
+  late final Future<void> _initFuture;
 
-          final title = p['title']?.toString() ?? '';
-          final type = p['type']?.toString() ?? 'info';
+  @override
+  void initState() {
+    super.initState();
+    _initFuture = InitService.initialize(); // einmal gespeichert, nie neu erzeugt
+  }
 
-          IconData icon = Icons.info_outline_rounded;
-          Color color1 = theme.info.shade500!;
-          Color color2 = theme.info.shade400!;
-          if (type == 'error') {
-            icon = Icons.error_outline_rounded;
-            color1 = theme.warning.shade500!;
-            color2 = theme.warning.shade400!;
-          }
-
-          final heightOffset = (p['heightOffset'] is num) ? (p['heightOffset'] as num).toDouble() : 50.0;
-
-          showAnimatedSnackbarGlobal(
-            navigatorKey: navigatorKey,
-            icon: icon,
-            color1: color1,
-            color2: color2,
-            title: title,
-            heightOffset: heightOffset,
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _initFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return MaterialApp(
+            home: Scaffold(
+              body: Center(child: Text('Fehler: ${snapshot.error}')),
+            ),
           );
-        } catch (_) {}
-      });
-
-      dependencies.webSocketBus.on('USER_SIGNED_OUT').listen((_) {
-        navigatorKey.currentState?.pushAndRemoveUntil(
-          PageRouteBuilder(
-            transitionDuration: Duration(milliseconds: 500),
-            settings: RouteSettings(name: "setupPage"),
-            pageBuilder: (context, animation, secondaryAnimation) => SetupPage(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              final slide = Tween<Offset>(begin: Offset(1, 0), end: Offset.zero)
-                  .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut));
-              return SlideTransition(position: slide, child: child);
-            },
-          ),
-          (route) => false,
-        );
-      });
-    } catch (_) {}
-  });
+        }
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const MaterialApp(
+            home: _LoadingScreen(),
+          );
+        }
+        return MyAppLifecycleHandler(child: const HazelnutApp());
+      },
+    );
+  }
 }
 
 class HazelnutApp extends ConsumerWidget {
@@ -108,48 +74,45 @@ class HazelnutApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loadingService = ref.watch(loadingServiceProvider);
-    final prefsService = ref.watch(appDependenciesProvider).prefsService;
+    final setupComplete = ref.watch(setupCompleteProvider);
 
     return MaterialApp(
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       navigatorKey: navigatorKey,
       navigatorObservers: [routeObserver],
-      color: Colors.transparent,
       debugShowCheckedModeBanner: false,
       title: "Hazelnut",
       theme: lightMode,
       darkTheme: darkMode,
       themeMode: ThemeMode.system,
-      home: FutureBuilder(
-        future: prefsService.getBool("setupComplete"),
-        builder: (context, asyncSnapshot) {
-          if (!asyncSnapshot.hasData) {
-            return const Center(child: CircularProgressIndicator(
-              color: Colors.deepOrange,
-            ));
-          }
-
-          return Stack(
-            children: [
-              asyncSnapshot.data! ? HomePage() : SetupPage(),
-    
-              if (loadingService.isLoading)
-                Builder(
-                  builder: (context) {
-                    final theme = Theme.of(context).extension<CustomColors>()!;
-                    return Container(
-                      color: Colors.black54,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: theme.info.shade500,
-                        ),
-                      ),
-                    );
-                  },
+      home: Stack(
+        children: [
+          setupComplete ? const HomePage() : const SetupPage(),
+          if (loadingService.isLoading)
+            Builder(builder: (context) {
+              final theme = Theme.of(context).extension<CustomColors>()!;
+              return Container(
+                color: Colors.black54,
+                child: Center(
+                  child: CircularProgressIndicator(color: theme.info.shade500),
                 ),
-            ],
-          );
-        },
+              );
+            }),
+        ],
+      ),
+    );
+  }
+}
+
+class _LoadingScreen extends StatelessWidget {
+  const _LoadingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: CircularProgressIndicator(color: Colors.deepOrange),
       ),
     );
   }

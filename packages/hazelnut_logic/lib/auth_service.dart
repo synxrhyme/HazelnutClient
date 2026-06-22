@@ -1,12 +1,11 @@
 import 'package:flutter/widgets.dart';
-import 'package:hazelnut_shared/auth_service.dart';
-import 'package:hazelnut_shared/database_service.dart';
-import 'package:hazelnut_shared/preferences_service.dart';
-import 'package:hazelnut_shared/secure_storage_service.dart';
-import 'package:hazelnut_shared/websocket_bus.dart';
-import 'package:hazelnut_shared/websocket_service.dart';
+import 'package:hazelnut_logic/database_service.dart';
+import 'package:hazelnut_logic/preferences_service.dart';
+import 'package:hazelnut_logic/secure_storage_service.dart';
+import 'package:hazelnut_logic/websocket_bus.dart';
+import 'package:hazelnut_logic/websocket_service.dart';
 
-class AuthServiceImpl extends AuthService {
+class AuthService {
   final GlobalKey<NavigatorState> navigatorKey;
   final WebSocketBus webSocketBus;
   final SecureStorageService secureStorageService;
@@ -16,7 +15,7 @@ class AuthServiceImpl extends AuthService {
 
   final WebSocketService webSocketService;
 
-  AuthServiceImpl({
+  AuthService({
     required this.webSocketBus,
     required this.secureStorageService,
     required this.prefsService,
@@ -25,19 +24,16 @@ class AuthServiceImpl extends AuthService {
     required this.navigatorKey
   });
 
-  @override
   Future<String> signUp(String username, String password) async {
     await Future.delayed(Duration(seconds: 2));
     return "dummy_token_for_$username";
   }
 
-  @override
   Future<String?> signIn() async {
     await Future.delayed(Duration(seconds: 2));
     return "dummy_token_for_signed_in_user";
   }
 
-  @override
   Future<void> signOut() async {
     secureStorageService.deleteToken("username");
     secureStorageService.deleteToken("userId");

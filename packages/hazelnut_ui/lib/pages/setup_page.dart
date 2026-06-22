@@ -1,7 +1,7 @@
 import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:hazelnut_shared/app_dependencies.dart";
-import "package:hazelnut_shared/secure_storage_service.dart";
+import "package:hazelnut_logic/app_dependencies.dart";
+import "package:hazelnut_logic/secure_storage_service.dart";
 import "package:hazelnut_ui/theme.dart";
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter/material.dart';

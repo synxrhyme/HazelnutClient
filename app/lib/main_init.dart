@@ -5,22 +5,21 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hazelnut_logic/database_service.dart';
+import 'package:hazelnut_logic/secure_storage_service.dart';
 import 'package:hazelnut_logic/util.dart';
+import 'package:hazelnut_logic/websocket_service.dart';
 import 'package:hazelnut_ui/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut_ui/pages/home_page.dart';
-import 'package:hazelnut/theme.dart';
 import 'package:hazelnut_ui/loading_provider.dart';
 import 'package:hazelnut_ui/snackbar_utils.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
 import 'package:hazelnut_logic/message_provider.dart';
 import 'package:hazelnut_logic/preferences_service.dart';
-import 'package:hazelnut_shared/app_dependencies.dart';
-import 'package:hazelnut_shared/database_service.dart';
+import 'package:hazelnut_logic/app_dependencies.dart';
 import 'package:hazelnut_shared/models.dart';
-import 'package:hazelnut_shared/preferences_service.dart';
-import 'package:hazelnut_shared/secure_storage_service.dart';
-import 'package:hazelnut_shared/websocket_service.dart';
+import 'package:hazelnut_ui/theme.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
@@ -28,7 +27,7 @@ Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
   debugPrint("handling background");
 
   WidgetsFlutterBinding.ensureInitialized();
-  final prefsService = await PreferencesServiceImpl.create();
+  final prefsService = await PreferencesService.create();
   final int chatId = int.parse(message.data["chatId"]);
   
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -66,28 +65,28 @@ Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
 }
 
 Future<void> initFirebase(SecureStorageService secureStorage) async {
-  unawaited(Firebase.initializeApp().then((_) async {
-    final FirebaseMessaging messaging = FirebaseMessaging.instance;
-    messaging.subscribeToTopic("HazelnutMessenger");
-
-    final String savedToken = await secureStorage.getToken("fcmToken");
-
-    if (savedToken.isEmpty) {
-      await messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-
-      final String fcmToken = await messaging.getToken() ?? "";
-      if (fcmToken.isNotEmpty) {
-        await secureStorage.saveToken("fcmToken", fcmToken);
-      }
+  await Firebase.initializeApp();
+  
+  final FirebaseMessaging messaging = FirebaseMessaging.instance;
+  await messaging.subscribeToTopic("HazelnutMessenger");
+  
+  final String savedToken = await secureStorage.getToken("fcmToken");
+  if (savedToken.isEmpty) {
+    await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    final String fcmToken = await messaging.getToken() ?? "";
+    if (fcmToken.isNotEmpty) {
+      await secureStorage.saveToken("fcmToken", fcmToken);
     }
+  }
 
-    if (!firebaseBackgroundInitialized) FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
+  if (!firebaseBackgroundInitialized) {
+    FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
     firebaseBackgroundInitialized = true;
-  }));
+  }
 }
 
 Future<void> initFullServices() async {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_logic/app_dependencies.dart';
 import 'package:hazelnut_logic/message_provider.dart';
+import 'package:hazelnut_logic/secure_storage_service.dart';
 import 'package:hazelnut_logic/util.dart';
-import 'package:hazelnut_shared/app_dependencies.dart';
-import 'package:hazelnut_shared/secure_storage_service.dart';
 import 'package:hazelnut_ui/components/navbar_item.dart';
 import "package:hazelnut_ui/pages/main_screens/main_page_1.dart";
 import "package:hazelnut_ui/pages/main_screens/main_page_2.dart";

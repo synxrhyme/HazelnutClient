@@ -1,11 +1,10 @@
+import 'package:hazelnut_logic/preferences_service.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:hazelnut_shared/database_service.dart';
 import 'package:hazelnut_shared/models.dart';
-import 'package:hazelnut_shared/preferences_service.dart';
 
-class DatabaseServiceImpl implements DatabaseService {
-  DatabaseServiceImpl._(this._preferences, this.chatDb, this.messageDb, this.userDb);
+class DatabaseService {
+  DatabaseService._(this._preferences, this.chatDb, this.messageDb, this.userDb);
 
   final PreferencesService _preferences;
 
@@ -13,14 +12,13 @@ class DatabaseServiceImpl implements DatabaseService {
   final Database messageDb;
   final Database userDb;
 
-  static Future<DatabaseServiceImpl> create({required PreferencesService preferences}) async {
+  static Future<DatabaseService> create({required PreferencesService preferences}) async {
     final chatDb = await _initChatDB();
     final messageDb = await _initMessageDB();
     final userDb = await _initUserDB();
-    return DatabaseServiceImpl._(preferences, chatDb, messageDb, userDb);
+    return DatabaseService._(preferences, chatDb, messageDb, userDb);
   }
 
-  @override
   Future<void> init() async {
     // Datenbanken sind bereits in create() initialisiert.
   }
@@ -93,7 +91,6 @@ class DatabaseServiceImpl implements DatabaseService {
     );
   }
   
-  @override
   Future<void> markMessageSent(String uId, int newMessageId) async {
     await messageDb.update(
       "messages",
@@ -106,24 +103,20 @@ class DatabaseServiceImpl implements DatabaseService {
     );
   }
 
-  @override
   Future<void> insertChatIntoDb(ChatModel chat) async {
     await chatDb.insert('chats', chat.exportJson());
   }
 
-  @override
   Future<void> insertMessageIntoDb(MessageModel message) async {
     final int lastUId = await _preferences.getInt("lastUId") ?? 0;
     await _preferences.setInt("lastUId", lastUId + 1);
     await messageDb.insert('messages', message.exportJson());
   }
 
-  @override
   Future<void> insertUserIntoDb(UserModel user) async {
     await userDb.insert('users', user.exportJson(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  @override
   Future<void> addUserToChat(int chatId, UserModel user) async {
     await insertUserIntoDb(user);
     await chatDb.insert(
@@ -133,7 +126,6 @@ class DatabaseServiceImpl implements DatabaseService {
     );
   }
 
-  @override
   Future<List<UserModel>> getUsersForChat(int chatId) async {
     final List<Map<String, dynamic>> mappings = await chatDb.query(
       'chat_users',
@@ -156,7 +148,6 @@ class DatabaseServiceImpl implements DatabaseService {
     return users;
   }
 
-  @override
   Future<List<ChatModel>> loadAllChats() async {
     final List<Map<String, dynamic>> maps = await chatDb.query("chats");
     return List<ChatModel>.generate(maps.length, (index) {
@@ -164,7 +155,6 @@ class DatabaseServiceImpl implements DatabaseService {
     });
   }
 
-  @override
   Future<List<MessageModel>> loadMessagesForChat(int chatId) async {
     final List<Map<String, dynamic>> mappedMessages = await messageDb.query(
       'messages',
@@ -176,7 +166,6 @@ class DatabaseServiceImpl implements DatabaseService {
     });
   }
 
-  @override
   Future<int> getLatestMessageId() async {
     final result = await messageDb.query(
       'messages',
@@ -186,7 +175,6 @@ class DatabaseServiceImpl implements DatabaseService {
     return latestId;
   }
 
-  @override
   Future<List<UserModel>> loadAllUsers() async {
     final List<Map<String, dynamic>> maps = await userDb.query('users');
     return List<UserModel>.generate(maps.length, (i) {
@@ -194,7 +182,6 @@ class DatabaseServiceImpl implements DatabaseService {
     });
   }
 
-  @override
   Future<List<MessageModel>?> getPendingMessages() async {
     final List<Map<String, dynamic>> mappedMessages = await messageDb.query(
       'messages',
@@ -207,7 +194,6 @@ class DatabaseServiceImpl implements DatabaseService {
     });
   }
 
-  @override
   Future<void> clearAll() async {
     await chatDb.delete("chats");
     await chatDb.delete("chat_users");

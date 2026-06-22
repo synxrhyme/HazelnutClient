@@ -8,21 +8,15 @@ import 'package:hazelnut_logic/crypto_service.dart';
 import 'package:hazelnut_shared/app_dependencies.dart';
 
 Future<AppDependencies> createDependencies() async {
-  final secureStorageService = SecureStorageServiceImpl();
-  final prefsService = await PreferencesServiceImpl.create();
-  final databaseService = await DatabaseServiceImpl.create(preferences: prefsService);
+  final secureStorageService = SecureStorageService();
+  final prefsService = await PreferencesService.create();
+  final databaseService = await DatabaseService.create(preferences: prefsService);
 
-  final cryptoService = CryptoServiceImpl();
-  final webSocketBus = WebSocketBusImpl();
-  final handshake = WebSocketHandshakeImpl(
-    cryptoService: cryptoService,
-  );
+  final cryptoService = CryptoService();
+  final webSocketBus = WebSocketBus();
+  final handshake = WebSocketHandshake(cryptoService: cryptoService);
 
-  //final MessageProvider messageProvider = MessageProvider();
-  //final ChatProvider chatProvider = ChatProvider();
-  //final UserProvider userProvider = UserProviderImpl.create();
-
-  final webSocketService = WebSocketServiceImpl(
+  final webSocketService = WebSocketService(
     webSocketBus: webSocketBus,
     secureStorage: secureStorageService,
     preferences: prefsService,
@@ -37,7 +31,5 @@ Future<AppDependencies> createDependencies() async {
     databaseService: databaseService,
     webSocketService: webSocketService,
     webSocketBus: webSocketBus,
-   //messageProvider: messageProvider,
-   //chatProvider: chatProvider,
   );
 }

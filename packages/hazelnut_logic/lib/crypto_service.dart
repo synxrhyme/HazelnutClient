@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cryptography/cryptography.dart' as crypto;
-import 'package:hazelnut_shared/crypto_service.dart';
 import 'package:pointycastle/export.dart' show HKDFKeyDerivator, HkdfParameters, SHA256Digest;
 
-class CryptoServiceImpl implements CryptoService {
+class CryptoService {
   @override
   Future<Map<String, dynamic>> encryptAES(Uint8List key, String plaintext) async {
     final aes = crypto.AesGcm.with256bits();

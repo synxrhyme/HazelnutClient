@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
+import 'package:hazelnut_logic/database_service.dart';
 import 'package:hazelnut_logic/message_provider.dart';
 import 'package:hazelnut_logic/util.dart';
-import 'package:hazelnut_shared/app_dependencies.dart';
-import 'package:hazelnut_shared/database_service.dart';
+import 'package:hazelnut_logic/app_dependencies.dart';
 
 class MainPage3 extends ConsumerStatefulWidget {
   const MainPage3({super.key});

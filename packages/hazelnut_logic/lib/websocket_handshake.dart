@@ -2,11 +2,10 @@ import 'dart:convert';
 import 'package:cryptography/cryptography.dart' as crypto;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:hazelnut_shared/crypto_service.dart';
-import 'package:hazelnut_shared/websocket_handshake.dart';
+import 'package:hazelnut_logic/crypto_service.dart';
 import 'package:mlkem_native/mlkem768.dart';
 
-class WebSocketHandshakeImpl implements WebSocketHandshake {
+class WebSocketHandshake {
   final CryptoService cryptoService;
   late Function(String) _sendMessage;
 
@@ -15,26 +14,22 @@ class WebSocketHandshakeImpl implements WebSocketHandshake {
   crypto.KeyPair? _ed25519KeyPair;
   Uint8List? _sessionKey;
 
-  WebSocketHandshakeImpl({
+  WebSocketHandshake({
     required this.cryptoService,
   });
 
-  @override
   void setSendMessage(Function(String) sendMessage) {
     _sendMessage = sendMessage;
   }
 
-  @override
   Uint8List? getSessionKey() => _sessionKey;
 
-  @override
   void reset() {
     _mlkemKeyPair = null;
     _ed25519KeyPair = null;
     _sessionKey = null;
   }
 
-  @override
   Future<void> initiate() async {
     final mlkem = MLKEM768();
     _mlkemKeyPair = mlkem.generateKeyPair();
@@ -72,7 +67,6 @@ class WebSocketHandshakeImpl implements WebSocketHandshake {
     debugPrint("[WebSocket] MLKEM-Key gesendet");
   }
 
-  @override
   Future<void> handleResponse(Map<String, dynamic> data) async {
     if (data["status"] != "success") {
       throw Exception("Schlüsselaustausch fehlgeschlagen");
@@ -100,7 +94,6 @@ class WebSocketHandshakeImpl implements WebSocketHandshake {
     debugPrint("[WebSocket] Session Key etabliert");
   }
 
-  @override
   Future<void> confirmKey(Map<String, dynamic> data) async {
     if (_sessionKey == null || _ed25519KeyPair == null) {
       throw Exception("Handshake nicht richtig initialisiert");

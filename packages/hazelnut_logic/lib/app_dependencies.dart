@@ -1,16 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'secure_storage_service.dart';
-import 'preferences_service.dart';
-import 'database_service.dart';
-import 'websocket_service.dart' as ws_interface;
-import 'websocket_bus.dart' as ws_bus_interface;
+import 'package:hazelnut_logic/database_service.dart';
+import 'package:hazelnut_logic/preferences_service.dart';
+import 'package:hazelnut_logic/secure_storage_service.dart';
+import 'package:hazelnut_logic/websocket_bus.dart';
+import 'package:hazelnut_logic/websocket_service.dart';
 
 class AppDependencies {
   final SecureStorageService secureStorageService;
   final PreferencesService prefsService;
   final DatabaseService databaseService;
-  final ws_interface.WebSocketService webSocketService;
-  final ws_bus_interface.WebSocketBus webSocketBus;
+  final WebSocketService webSocketService;
+  final WebSocketBus webSocketBus;
 
   AppDependencies({
     required this.secureStorageService,

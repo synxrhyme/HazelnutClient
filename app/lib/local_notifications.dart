@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:hazelnut_logic/preferences_service.dart';
 import 'package:hazelnut_ui/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut_ui/pages/chat_screen.dart';
-import 'package:hazelnut_shared/preferences_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatNotifications {

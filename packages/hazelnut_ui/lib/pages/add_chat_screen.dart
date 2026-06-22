@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
-import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_logic/app_dependencies.dart';
+import 'package:hazelnut_logic/secure_storage_service.dart';
+import 'package:hazelnut_logic/websocket_service.dart';
 import 'package:hazelnut_shared/navigation.dart';
-import 'package:hazelnut_shared/secure_storage_service.dart';
-import 'package:hazelnut_shared/websocket_service.dart';
 import 'package:hazelnut_ui/snackbar_utils.dart';
 import 'package:hazelnut_ui/theme.dart';
 

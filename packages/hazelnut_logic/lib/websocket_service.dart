@@ -2,17 +2,15 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
-import 'package:hazelnut_shared/crypto_service.dart';
-import 'package:hazelnut_shared/database_service.dart';
-import 'package:hazelnut_shared/preferences_service.dart';
-import 'package:hazelnut_shared/secure_storage_service.dart';
-import 'package:hazelnut_shared/websocket_bus.dart';
-import 'package:hazelnut_shared/websocket_handshake.dart';
-import 'package:hazelnut_shared/websocket_service.dart';
+import 'package:hazelnut_logic/crypto_service.dart';
+import 'package:hazelnut_logic/database_service.dart';
+import 'package:hazelnut_logic/preferences_service.dart';
+import 'package:hazelnut_logic/secure_storage_service.dart';
+import 'package:hazelnut_logic/websocket_bus.dart';
+import 'package:hazelnut_logic/websocket_handshake.dart';
 
-class WebSocketServiceImpl implements WebSocketService {
+class WebSocketService {
   final SecureStorageService secureStorage;
   final PreferencesService preferences;
   final WebSocketBus webSocketBus;
@@ -20,7 +18,7 @@ class WebSocketServiceImpl implements WebSocketService {
   final WebSocketHandshake handshake;
   final CryptoService cryptoService;
 
-  WebSocketServiceImpl({
+  WebSocketService({
     required this.webSocketBus,
     required this.secureStorage,
     required this.preferences,
@@ -29,7 +27,6 @@ class WebSocketServiceImpl implements WebSocketService {
     required this.cryptoService,
   });
 
-  @override
   void Function(Map<String, dynamic>)? onMessage;
 
   WebSocket? _socket;
@@ -41,7 +38,6 @@ class WebSocketServiceImpl implements WebSocketService {
   bool _connected = false;
   bool _connecting = false;
 
-  @override
   bool get isConnected => _connected;
 
   final Queue<String> _messageQueue = Queue<String>();
@@ -50,11 +46,8 @@ class WebSocketServiceImpl implements WebSocketService {
   Timer? _pingTimer;
   DateTime? _lastPongTime;
 
-
-  @override
   void setUrl(String url) => _url = url;
 
-  @override
   void setReady(bool value) {
     _ready = value;
     if (_ready) _flushQueue();
@@ -78,7 +71,6 @@ class WebSocketServiceImpl implements WebSocketService {
     }
   }
 
-  @override
   Future<void> connect() async {
     if (_url == null || _connected || _connecting) return;
 
@@ -114,7 +106,6 @@ class WebSocketServiceImpl implements WebSocketService {
     }
   }
 
-  @override
   Future<void> sendMessageRaw(String raw) async {
     if (!_connected || !_ready || _forceClosed) {
       if (!_messageQueue.contains(raw)) _messageQueue.addLast(raw);
@@ -221,7 +212,6 @@ class WebSocketServiceImpl implements WebSocketService {
     _reconnectTimer = null;
   }
 
-  @override
   Future<void> sendMessage(String raw) async {
     if (!_connected || !_ready || _forceClosed) {
       if (!_messageQueue.contains(raw)) _messageQueue.addLast(raw);
@@ -243,7 +233,6 @@ class WebSocketServiceImpl implements WebSocketService {
     _socket!.add(jsonEncode(encrypted));
   }
 
-  @override
   Future<void> close(bool forceClose) async {
     _forceClosed = forceClose;
     if (forceClose) _stopReconnectLoop();
@@ -256,7 +245,6 @@ class WebSocketServiceImpl implements WebSocketService {
     handshake.reset();
   }
 
-  @override
   void refreshForAction(Map<String, dynamic> action) {
     // Logik für refresh, evtl. secureStorage verwenden
   }

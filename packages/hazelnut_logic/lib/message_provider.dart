@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/legacy.dart';
-import 'package:hazelnut_shared/app_dependencies.dart';
-import 'package:hazelnut_shared/database_service.dart';
+import 'package:hazelnut_logic/database_service.dart';
+import 'package:hazelnut_logic/secure_storage_service.dart';
+import 'package:hazelnut_logic/websocket_bus.dart';
 import 'package:hazelnut_shared/models.dart';
-import 'package:hazelnut_shared/secure_storage_service.dart';
-import 'package:hazelnut_shared/websocket_bus.dart';
 
 class MessageProvider extends ChangeNotifier {
   MessageProvider(this.secureStorage, this.databaseService, this.webSocketBus) {

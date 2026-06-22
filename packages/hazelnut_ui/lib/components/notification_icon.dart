@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hazelnut_shared/app_dependencies.dart';
-import 'package:hazelnut_shared/preferences_service.dart';
+import 'package:hazelnut_logic/app_dependencies.dart';
+import 'package:hazelnut_logic/preferences_service.dart';
 
 final ValueNotifier<int> rebuildNotificationNumberTrigger = ValueNotifier(0);
 
