@@ -1,13 +1,8 @@
-import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:hazelnut_logic/app_dependencies.dart";
-import "package:hazelnut_logic/secure_storage_service.dart";
-import "package:hazelnut_logic/util.dart";
-import "package:hazelnut_ui/loading_provider.dart";
-import "package:hazelnut_ui/snackbar_utils.dart";
+import "package:hazelnut_logic/auth_service.dart";
 import "package:hazelnut_ui/theme.dart";
-import "package:hazelnut_shared/navigation.dart";
 
 class SetupPage3 extends ConsumerStatefulWidget {
   final String username;
@@ -18,49 +13,12 @@ class SetupPage3 extends ConsumerStatefulWidget {
 }
 
 class _SetupPage3State extends ConsumerState<SetupPage3> {
-  //late EventProvider eventProvider;
-  //late EventCallback registerCallback;
-
-  late final SecureStorageService secureStorage;
-
-  void sendRegistration(BuildContext context, CustomColors theme) async {
-    String fcmToken = await secureStorage.getToken("fcmToken");
-
-    if (!context.mounted) return;
-
+  void _sendRegistration(BuildContext context) {
     if (widget.username == "") {
-      showAnimatedSnackbarGlobal(
-        navigatorKey: ref.read(navigatorKeyProvider),
-        icon: Icons.error_outline_rounded,
-        color1: theme.warning.shade500!,
-        color2: theme.warning.shade400!,
-        title: "Der Username ist noch nicht gesetzt!",
-        heightOffset: 50,
-      );
+      ref.read(appDependenciesProvider).webSocketBus.emit("INVALID_SIGNUP_CREDENTIALS", {});
     }
 
-    final safeUsername = sanitizeRawInput(widget.username, maxLength: 30);
-    
-    ref.read(loadingServiceProvider).show();
-    await Future.delayed(Duration.zero);
-
-    Map<String, dynamic> request = {
-      "header": "auth_request",
-      "body": {
-        "type": "signup",
-        "username": safeUsername.toString(),
-        "fcmToken": fcmToken.toString(),
-      }
-    };
-
-    ref.read(appDependenciesProvider).webSocketService.sendMessageRaw(jsonEncode(request));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    secureStorage = ref.watch(appDependenciesProvider).secureStorageService;
+    ref.read(authServiceProvider).signUp(context, widget.username);
   }
 
   @override
@@ -108,7 +66,7 @@ class _SetupPage3State extends ConsumerState<SetupPage3> {
                   },
                 ),
               ),
-              onPressed: () => sendRegistration(context, theme),
+              onPressed: () => _sendRegistration(context),
               child: Text("Setup abschließen"),
             ),
           )

@@ -154,12 +154,12 @@ class _MainPage1State extends ConsumerState<MainPage1> {
                               //chatProvider.addItem(ChatWidget());
                             },
                             child: SizedBox(
-                              width: 50,
+                              width: 30,
                               height: 40,
                               child: Center(
                                 child: Icon(
                                   Icons.add_rounded,
-                                  size: 35,
+                                  size: 30,
                                   color: Theme.of(context).primaryColor,
                                 ),
                               ),
@@ -168,7 +168,7 @@ class _MainPage1State extends ConsumerState<MainPage1> {
                         ),
                       ),
                       SizedBox(
-                        width: 30,
+                        width: 10,
                       ),
                       Consumer(
                         builder: (context, ref, child) {
@@ -187,11 +187,11 @@ class _MainPage1State extends ConsumerState<MainPage1> {
                                   //);
                                 },
                                 child: SizedBox(
-                                  width: 50,
+                                  width: 30,
                                   height: 40,
                                   child: Icon(
                                     Icons.edit,
-                                    size: 25,
+                                    size: 20,
                                     color: Theme.of(context).primaryColor,
                                   ),
                                 ),

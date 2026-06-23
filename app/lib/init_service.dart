@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut/deps.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut/main_init.dart';
@@ -11,14 +12,16 @@ import 'package:hazelnut_ui/theme.dart';
 
 class InitService {
   static Future<void> initialize() async {
-    final dependencies = await createDependencies();
+    final dependencies = await createDependencies(navigatorKey);
     final setupComplete = await dependencies.prefsService.getBool("setupComplete") ?? false;
 
-    container.updateOverrides([
-      appDependenciesProvider.overrideWithValue(dependencies),
-      setupCompleteProvider.overrideWithValue(setupComplete),
-      navigatorKeyProvider.overrideWithValue(navigatorKey),
-    ]);
+    container = ProviderContainer(
+      overrides: [
+        appDependenciesProvider.overrideWithValue(dependencies),
+        setupCompleteProvider.overrideWithValue(setupComplete),
+        navigatorKeyProvider.overrideWithValue(navigatorKey),
+      ],
+    );
 
     // alles weitere was vor App-Start fertig sein muss:
     await initFirebase(dependencies.secureStorageService);
@@ -29,7 +32,7 @@ class InitService {
         final p = payload as Map<String, dynamic>;
         final ctx = rootScaffoldMessengerKey.currentContext;
         
-        if (ctx == null) return;
+        if (ctx == null || !ctx.mounted) return;
         final theme = Theme.of(ctx).extension<CustomColors>()!;
 
         final title = p['title']?.toString() ?? '';
@@ -75,6 +78,38 @@ class InitService {
           },
         ),
         (route) => false,
+      );
+    });
+
+    dependencies.webSocketBus.on('INVALID_SIGNUP_CREDENTIALS').listen((_) {
+      final ctx = rootScaffoldMessengerKey.currentContext;
+      if (ctx == null || !ctx.mounted) return;
+      
+      final theme = Theme.of(ctx).extension<CustomColors>()!;
+
+      showAnimatedSnackbarGlobal(
+        navigatorKey: navigatorKey,
+        icon: Icons.error_outline_rounded,
+        color1: theme.warning.shade500!,
+        color2: theme.warning.shade400!,
+        title: "Der Username ist noch nicht gesetzt!",
+        heightOffset: 50,
+      );
+    });
+
+    dependencies.webSocketBus.on('REFRESH_TOKEN_EMPTY').listen((_) {
+      final ctx = rootScaffoldMessengerKey.currentContext;
+      if (ctx == null || !ctx.mounted) return;
+      
+      final theme = Theme.of(ctx).extension<CustomColors>()!;
+
+      showAnimatedSnackbarGlobal(
+        navigatorKey: navigatorKey,
+        icon: Icons.error_outline_rounded,
+        color1: theme.warning.shade500!,
+        color2: theme.warning.shade400!,
+        title: "Refresh-Token nicht gefunden",
+        heightOffset: 50,
       );
     });
   }

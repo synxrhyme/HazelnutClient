@@ -4,39 +4,35 @@ import "package:hazelnut/life_cycle_handler.dart";
 import "package:hazelnut/route_observer.dart";
 import "package:flutter/material.dart";
 import "package:hazelnut_logic/app_state_provider.dart";
-import "package:hazelnut_ui/loading_provider.dart";
 import "package:hazelnut/event_provider.dart";
+import "package:hazelnut_logic/auth_service.dart";
+import "package:hazelnut_logic/loading_provider.dart";
 import "package:hazelnut_ui/pages/home_page.dart";
 import "package:hazelnut_ui/pages/setup_page.dart";
 import "package:hazelnut_ui/theme.dart";
 
 final EventProvider eventProviderGlobal = EventProvider();
-final ProviderContainer container = ProviderContainer();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 final routeObserver = GlobalRouteObserver();
 bool firebaseBackgroundInitialized = false;
 
+late final ProviderContainer container;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const _InitWrapper(),
-    ),
-  );
+  runApp(_InitWrapper());
 }
 
-class _InitWrapper extends StatefulWidget {
+class _InitWrapper extends ConsumerStatefulWidget {
   const _InitWrapper();
 
   @override
-  State<_InitWrapper> createState() => _InitWrapperState();
+  ConsumerState<_InitWrapper> createState() => _InitWrapperState();
 }
 
-class _InitWrapperState extends State<_InitWrapper> {
+class _InitWrapperState extends ConsumerState<_InitWrapper> {
   late final Future<void> _initFuture;
 
   @override
@@ -52,17 +48,24 @@ class _InitWrapperState extends State<_InitWrapper> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             home: Scaffold(
               body: Center(child: Text('Fehler: ${snapshot.error}')),
             ),
           );
         }
+
         if (snapshot.connectionState != ConnectionState.done) {
           return const MaterialApp(
-            home: _LoadingScreen(),
+            debugShowCheckedModeBanner: false,
+            home: _LoadingScreen()
           );
         }
-        return MyAppLifecycleHandler(child: const HazelnutApp());
+
+        return UncontrolledProviderScope(
+          container: container,
+          child: MyAppLifecycleHandler(child: const HazelnutApp()),
+        );
       },
     );
   }
@@ -75,6 +78,10 @@ class HazelnutApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final loadingService = ref.watch(loadingServiceProvider);
     final setupComplete = ref.watch(setupCompleteProvider);
+
+    Future.microtask(() {
+      ref.read(authServiceProvider);
+    });
 
     return MaterialApp(
       scaffoldMessengerKey: rootScaffoldMessengerKey,

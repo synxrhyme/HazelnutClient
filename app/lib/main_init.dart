@@ -12,7 +12,7 @@ import 'package:hazelnut_logic/websocket_service.dart';
 import 'package:hazelnut_ui/components/notification_icon.dart';
 import 'package:hazelnut/main.dart';
 import 'package:hazelnut_ui/pages/home_page.dart';
-import 'package:hazelnut_ui/loading_provider.dart';
+import 'package:hazelnut_logic/loading_provider.dart';
 import 'package:hazelnut_ui/snackbar_utils.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
 import 'package:hazelnut_logic/message_provider.dart';

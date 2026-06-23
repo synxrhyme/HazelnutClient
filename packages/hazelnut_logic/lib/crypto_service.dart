@@ -4,7 +4,6 @@ import 'package:cryptography/cryptography.dart' as crypto;
 import 'package:pointycastle/export.dart' show HKDFKeyDerivator, HkdfParameters, SHA256Digest;
 
 class CryptoService {
-  @override
   Future<Map<String, dynamic>> encryptAES(Uint8List key, String plaintext) async {
     final aes = crypto.AesGcm.with256bits();
     final secretKey = crypto.SecretKey(key);
@@ -17,13 +16,13 @@ class CryptoService {
     );
 
     return {
+      "type": "enc",
       "iv": base64Encode(nonce),
       "data": base64Encode(secretBox.cipherText),
       "tag": base64Encode(secretBox.mac.bytes),
     };
   }
 
-  @override
   Future<String> decryptAES(Uint8List key, Map<String, dynamic> payload) async {
     final aes = crypto.AesGcm.with256bits();
     final secretKey = crypto.SecretKey(key);
@@ -38,7 +37,6 @@ class CryptoService {
     return utf8.decode(cleartext);
   }
 
-  @override
   Uint8List deriveAesKey(Uint8List sharedSecret, {Uint8List? salt, Uint8List? info}) {
     final hkdf = HKDFKeyDerivator(SHA256Digest());
 
@@ -57,7 +55,6 @@ class CryptoService {
     return output;
   }
 
-  @override
   Future<bool> verifyServerSignature(
     Uint8List ciphertext,
     Uint8List signature,

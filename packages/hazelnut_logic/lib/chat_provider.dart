@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:hazelnut_logic/database_service.dart';
-import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_logic/app_dependencies.dart';
 import 'package:hazelnut_shared/models.dart';
 
 class ChatProvider extends ChangeNotifier {

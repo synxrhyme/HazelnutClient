@@ -9,6 +9,7 @@ class NavBarItem extends StatelessWidget {
   final Color unselectedColor;
 
   const NavBarItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.selected,

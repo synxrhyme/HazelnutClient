@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut_logic/database_service.dart';
+import 'package:hazelnut_logic/loading_provider.dart';
 import 'package:hazelnut_logic/preferences_service.dart';
 import 'package:hazelnut_logic/secure_storage_service.dart';
 import 'package:hazelnut_logic/websocket_bus.dart';
@@ -9,8 +10,11 @@ class AppDependencies {
   final SecureStorageService secureStorageService;
   final PreferencesService prefsService;
   final DatabaseService databaseService;
+  
   final WebSocketService webSocketService;
   final WebSocketBus webSocketBus;
+
+  final LoadingService loadingService;
 
   AppDependencies({
     required this.secureStorageService,
@@ -18,6 +22,7 @@ class AppDependencies {
     required this.databaseService,
     required this.webSocketService,
     required this.webSocketBus,
+    required this.loadingService,
   });
 }
 

@@ -3,7 +3,7 @@ import 'package:characters/characters.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:hazelnut_logic/message_provider.dart';
-import 'package:hazelnut_shared/app_dependencies.dart';
+import 'package:hazelnut_logic/app_dependencies.dart';
 
 String sanitizeRawInput(
   String? input, {
