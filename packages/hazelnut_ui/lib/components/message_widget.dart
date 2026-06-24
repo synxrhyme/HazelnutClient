@@ -29,13 +29,13 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: theme.background.shade700,
+        color: theme.neutral.shade700,
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 18,
-            backgroundColor: theme.background.shade400,
+            backgroundColor: theme.neutral.shade400,
             child: Text(
               widget.message.senderName[0].toUpperCase(),
               style: TextStyle(

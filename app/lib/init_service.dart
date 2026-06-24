@@ -5,6 +5,9 @@ import 'package:hazelnut/main.dart';
 import 'package:hazelnut/main_init.dart';
 import 'package:hazelnut_logic/app_dependencies.dart';
 import 'package:hazelnut_logic/app_state_provider.dart';
+import 'package:hazelnut_logic/auth_service.dart';
+import 'package:hazelnut_logic/chat_provider.dart';
+import 'package:hazelnut_logic/util.dart';
 import 'package:hazelnut_shared/navigation.dart';
 import 'package:hazelnut_ui/pages/setup_page.dart';
 import 'package:hazelnut_ui/snackbar_utils.dart';
@@ -22,6 +25,10 @@ class InitService {
         navigatorKeyProvider.overrideWithValue(navigatorKey),
       ],
     );
+
+    container.read(authServiceProvider);
+    container.read(chatProviderProvider).loadChats();
+    container.read(messageProviderProvider).loadAll();
 
     // alles weitere was vor App-Start fertig sein muss:
     await initFirebase(dependencies.secureStorageService);
@@ -81,34 +88,49 @@ class InitService {
       );
     });
 
-    dependencies.webSocketBus.on('INVALID_SIGNUP_CREDENTIALS').listen((_) {
+    dependencies.webSocketBus.on('SHOW_SNACKBAR').listen((payload) {
+      final p = payload as Map<String, dynamic>;
       final ctx = rootScaffoldMessengerKey.currentContext;
+        
       if (ctx == null || !ctx.mounted) return;
-      
       final theme = Theme.of(ctx).extension<CustomColors>()!;
+
+      Color? color1;
+      Color? color2;
+      IconData? icon;
+      
+      switch (p["severity"]) {
+        case "error": {
+          color1 = theme.error.shade500!;
+          color2 = theme.error.shade400!;
+          icon = Icons.error_outline_rounded;
+        }
+
+        case "info": {
+          color1 = theme.info.shade500!;
+          color2 = theme.info.shade400!;
+          icon = Icons.error_outline_rounded;
+        }
+
+        case "success": {
+          color1 = theme.success.shade500!;
+          color2 = theme.success.shade400!;
+          icon = Icons.check_circle_outline_rounded;
+        }
+
+        default: {
+          color1 = Colors.white;
+          color2 = Colors.white;
+          icon = Icons.question_mark_rounded;
+        }
+      }
 
       showAnimatedSnackbarGlobal(
         navigatorKey: navigatorKey,
-        icon: Icons.error_outline_rounded,
-        color1: theme.warning.shade500!,
-        color2: theme.warning.shade400!,
-        title: "Der Username ist noch nicht gesetzt!",
-        heightOffset: 50,
-      );
-    });
-
-    dependencies.webSocketBus.on('REFRESH_TOKEN_EMPTY').listen((_) {
-      final ctx = rootScaffoldMessengerKey.currentContext;
-      if (ctx == null || !ctx.mounted) return;
-      
-      final theme = Theme.of(ctx).extension<CustomColors>()!;
-
-      showAnimatedSnackbarGlobal(
-        navigatorKey: navigatorKey,
-        icon: Icons.error_outline_rounded,
-        color1: theme.warning.shade500!,
-        color2: theme.warning.shade400!,
-        title: "Refresh-Token nicht gefunden",
+        icon: icon,
+        color1: color1,
+        color2: color2,
+        title: p["title"],
         heightOffset: 50,
       );
     });

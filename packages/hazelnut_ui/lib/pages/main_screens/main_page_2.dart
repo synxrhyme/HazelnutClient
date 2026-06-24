@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut_logic/app_dependencies.dart';
 import 'package:hazelnut_shared/navigation.dart';
 import 'package:hazelnut_logic/loading_provider.dart';
+import 'package:hazelnut_ui/components/standard_app_bar.dart';
 import 'package:hazelnut_ui/snackbar_utils.dart';
 import 'package:hazelnut_ui/theme.dart';
 
@@ -24,17 +25,11 @@ class _MainPage2State extends ConsumerState<MainPage2> {
   bool showingError = false;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
+    chatNameFocusNode.dispose();
+    chatAuthFocusNode.dispose();
+    chatNameController.dispose();
+    chatAuthController.dispose();
     super.dispose();
   }
 
@@ -42,144 +37,171 @@ class _MainPage2State extends ConsumerState<MainPage2> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<CustomColors>()!;
 
-    return Container(
-      color: Colors.transparent,
-      child: Column(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            margin: EdgeInsets.only(top: 70),
-            child: Text('Chatrooms erstellen', style: TextStyle(fontSize: 24, fontFamily: "Space Grotesk", color: Theme.of(context).primaryColor), textAlign: TextAlign.center),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: StandardAppBar(theme: theme, title: "Chatrooms erstellen", leading: null),
+      backgroundColor: Colors.transparent,
+      body: Align(
+        alignment: AlignmentGeometry.xy(0, -0.4),
+        child: Container(
+          margin: EdgeInsets.only(top: 50),
+          width: MediaQuery.of(context).size.width * 0.85,
+          decoration: BoxDecoration(
+            color: theme.neutral.shade600,
+            borderRadius: BorderRadius.circular(15),
           ),
-          Container(
-            margin: EdgeInsets.only(top: 50),
-            width: MediaQuery.of(context).size.width * 0.85,
-            height: MediaQuery.of(context).size.height * 0.55,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade800.withAlpha(30),
-              borderRadius: BorderRadius.circular(7)
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: IntrinsicHeight(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
+                SizedBox(height: 50),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Chatroom-Name:", style: TextStyle(color: Theme.of(context).primaryColor, fontFamily: "Space Grotesk")),
-                    SizedBox(height: 5),
                     TextField(
                       focusNode: chatNameFocusNode,
                       controller: chatNameController,
+                      style: TextStyle(color: Colors.white, fontFamily: "IBM Sans", fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.grey.shade800.withAlpha(40),
+                        fillColor: theme.neutral.shade500,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(6),
                           borderSide: BorderSide.none,
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide.none,
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide.none,
+                        ),
+                        icon: Icon(Icons.tag_rounded, color: theme.info.shade400)
                       ),
-                      cursorColor: Theme.of(context).primaryColor,
+                      cursorColor: Colors.white,
                       onTapOutside: (event) {
                         chatNameFocusNode.unfocus();
                       },
                     ),
-                    SizedBox(height: 50),
-                    Text("Chatroom-Passwort:", style: TextStyle(color: Theme.of(context).primaryColor, fontFamily: "Space Grotesk")),
-                    SizedBox(height: 5),
+                    SizedBox(height: 20),
                     TextField(
                       focusNode: chatAuthFocusNode,
                       controller: chatAuthController,
+                      style: TextStyle(color: Colors.white, fontFamily: "IBM Sans", fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.grey.shade800.withAlpha(40),
+                        fillColor: theme.neutral.shade500,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide.none
+                          borderRadius: BorderRadius.circular(15)
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide.none,
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide.none,
+                        ),
+                        icon: Icon(Icons.key_rounded, color: theme.info.shade400)
                       ),
-                      cursorColor: Theme.of(context).primaryColor,
+                      cursorColor: Colors.white,
                       onTapOutside: (event) {
                         chatAuthFocusNode.unfocus();
                       },
                     ),
                   ],
                 ),
+                SizedBox(height: 80),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
-                          if (chatNameController.text == "") {
-                            showAnimatedSnackbarGlobal(
-                              navigatorKey: ref.read(navigatorKeyProvider),
-                              icon: Icons.error_outline_rounded,
-                              color1: theme.info.shade500!,
-                              color2: theme.info.shade400!,
-                              title: "Chatroom-Name ist nicht gesetzt!",
-                              heightOffset: 50,
-                            );
-                            return;
-                          }
-    
-                          if (chatAuthController.text == "") {
-                            showAnimatedSnackbarGlobal(
-                              navigatorKey: ref.read(navigatorKeyProvider),
-                              icon: Icons.error_outline_rounded,
-                              color1: theme.info.shade500!,
-                              color2: theme.info.shade400!,
-                              title: "Chatroom-Passwort ist nicht gesetzt!",
-                              heightOffset: 50,
-                            );
-                            return;
-                          }
-
-                          ref.read(loadingServiceProvider).show();
-                          await Future.delayed(Duration.zero);
-    
-                          final String chatName  = chatNameController.text.toString();
-                          final String chatAuth  = chatAuthController.text.toString();
-                          final String timestamp = DateTime.now().toUtc().toIso8601String();
-    
-                          Map<String, dynamic> request = {
-                            "header": "create_chat",
-                            "body": {
-                              "chatName":  chatName,
-                              "chatAuth":  chatAuth,
-                              "timestamp": timestamp
-                            }
-                          };
-    
-                          if (!context.mounted) return;
-                          ref.read(appDependenciesProvider).webSocketService.sendMessage(jsonEncode(request).toString());
-
-                          chatNameController.clear();
-                          chatAuthController.clear();
+                          await createChatRoom(theme);
                         },
                         style: ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(Colors.grey.shade800.withAlpha(50)),
+                          backgroundColor: WidgetStatePropertyAll(theme.neutral.shade500),
                           shape:           WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
                           shadowColor:     WidgetStatePropertyAll(Colors.transparent),
                           overlayColor:    WidgetStateProperty.resolveWith<Color?>(
                                             (Set<WidgetState> states) {
                                               if (states.contains(WidgetState.pressed)) {
-                                                return theme.background.shade200!.withValues(alpha: 100);
+                                                return theme.neutral.shade200!.withValues(alpha: 100);
                                               }
                                               return null;
                                             },
                           ),
                         ),
-                        child: Text("Chatroom erstellen", style: TextStyle(color: theme.info.shade500)),
+                        child: Text("Chatroom erstellen", style: TextStyle(color: theme.info.shade400, fontFamily: "IBM Sans", fontWeight: FontWeight.w500)),
                       ),
                     ),
                   ],
                 ),
+                SizedBox(height: 50),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  Future<void> createChatRoom(CustomColors theme) async {
+    if (chatNameController.text == "") {
+        showAnimatedSnackbarGlobal(
+          navigatorKey: ref.read(navigatorKeyProvider),
+          icon: Icons.error_outline_rounded,
+          color1: theme.info.shade500!,
+          color2: theme.info.shade400!,
+          title: "Chatroom-Name ist nicht gesetzt!",
+          heightOffset: 50,
+        );
+        return;
+      }
+      
+      if (chatAuthController.text == "") {
+        showAnimatedSnackbarGlobal(
+          navigatorKey: ref.read(navigatorKeyProvider),
+          icon: Icons.error_outline_rounded,
+          color1: theme.info.shade500!,
+          color2: theme.info.shade400!,
+          title: "Chatroom-Passwort ist nicht gesetzt!",
+          heightOffset: 50,
+        );
+        return;
+      }
+      
+      ref.read(loadingServiceProvider).show();
+      await Future.delayed(Duration.zero);
+      
+      final String chatName  = chatNameController.text.toString();
+      final String chatAuth  = chatAuthController.text.toString();
+      final String timestamp = DateTime.now().toUtc().toIso8601String();
+      
+      Map<String, dynamic> request = {
+        "header": "create_chat",
+        "body": {
+          "chatName":  chatName,
+          "chatAuth":  chatAuth,
+          "timestamp": timestamp
+        }
+      };
+      
+      if (!context.mounted) return;
+      ref.read(appDependenciesProvider).webSocketService.sendMessage(jsonEncode(request).toString());
+      
+      chatNameController.clear();
+      chatAuthController.clear();
   }
 }

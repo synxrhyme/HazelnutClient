@@ -15,7 +15,10 @@ class SetupPage3 extends ConsumerStatefulWidget {
 class _SetupPage3State extends ConsumerState<SetupPage3> {
   void _sendRegistration(BuildContext context) {
     if (widget.username == "") {
-      ref.read(appDependenciesProvider).webSocketBus.emit("INVALID_SIGNUP_CREDENTIALS", {});
+      ref.read(appDependenciesProvider).webSocketBus.emit("SHOW_SNACKBAR", {
+        "severity": "error",
+        "title": "Refresh-Token nicht gefunden",
+      });
     }
 
     ref.read(authServiceProvider).signUp(context, widget.username);
@@ -31,7 +34,7 @@ class _SetupPage3State extends ConsumerState<SetupPage3> {
     final theme = Theme.of(context).extension<CustomColors>()!;
 
     return Container(
-      color: theme.background.shade600,
+      color: theme.neutral.shade600,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -52,7 +55,7 @@ class _SetupPage3State extends ConsumerState<SetupPage3> {
             padding: const EdgeInsets.only(top: 80, bottom: 50),
             child: ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStatePropertyAll(theme.background.shade400),
+                backgroundColor: WidgetStatePropertyAll(theme.neutral.shade400),
                 foregroundColor: WidgetStatePropertyAll(theme.info.shade300),
                 shadowColor: WidgetStateProperty.all(Colors.transparent),
                 shape: WidgetStateProperty.all<RoundedRectangleBorder>(

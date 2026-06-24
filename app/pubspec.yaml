@@ -61,3 +61,12 @@ flutter:
     - family: Space Grotesk
       fonts:
         - asset: assets/fonts/SpaceGrotesk.ttf
+    - family: Geist
+      fonts:
+        - asset: assets/fonts/Geist.ttf
+    - family: IBM Sans
+      fonts:
+        - asset: assets/fonts/IBMPlexSans.ttf
+    - family: JetBrains Mono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono.ttf

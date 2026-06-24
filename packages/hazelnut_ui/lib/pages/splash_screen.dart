@@ -6,6 +6,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.black,
       body: Center(
         child: CircularProgressIndicator(color: Theme.of(context).primaryColor),

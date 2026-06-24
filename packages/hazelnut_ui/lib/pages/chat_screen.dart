@@ -91,52 +91,84 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final ChatModel        chat   = chats[widget.chatId];
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        toolbarHeight: 60,
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(0),
+          child: Container(
+            height: 1,
+            color: theme.neutral.shade300
+          ),
+        ),
+        backgroundColor: theme.neutral.background,
+        title: Row(
+          children: [
+            Expanded(child: 
+              Container(
+                margin: EdgeInsets.only(bottom: 10, top: 15),
+                child: Text(
+                  'Vertretungspläne',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 25,
+                    color: theme.accent.shade200,
+                    fontFamily: "Space Grotesk"
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Stack(
         children: [
           Container(
-            color: theme.background.shade800,
+            color: theme.neutral.background,
             child: Column(
               children: [
                 Expanded(
-                  child: ChatList(chatId: widget.chatId),
-                ),
-                SizedBox(
-                  height: 65,
-                  child: Row(
+                  child: Stack(
                     children: [
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.only(left: 10, right: 10, bottom: 15),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            border: BoxBorder.all(color: theme.background.shade600!, width: 2),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: TextField(
-                                  controller: _controller,
-                                  decoration: InputDecoration(
-                                    hintText: "Nachricht schreiben...",
-                                    hintStyle: TextStyle(color: Theme.of(context).primaryColor.withAlpha(120), fontSize: 15),
-                                    border: InputBorder.none,
+                      ChatList(chatId: widget.chatId),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              margin: EdgeInsets.only(left: 10, right: 10, bottom: 15),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: BoxBorder.all(color: theme.neutral.shade600!, width: 2),
+                                color: Colors.red
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _controller,
+                                      decoration: InputDecoration(
+                                        hintText: "Nachricht schreiben...",
+                                        hintStyle: TextStyle(color: Theme.of(context).primaryColor.withAlpha(120), fontSize: 15),
+                                        border: InputBorder.none,
+                                      ),
+                                      style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 15),
+                                      cursorColor: Theme.of(context).primaryColor,
+                                      maxLines: 1,
+                                    ),
                                   ),
-                                  style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 15),
-                                  cursorColor: Theme.of(context).primaryColor,
-                                  maxLines: 1,
-                                ),
+                                  IconButton(
+                                    icon: Icon(Icons.send_rounded),
+                                    onPressed: _sendMessage,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ],
                               ),
-                              IconButton(
-                                icon: Icon(Icons.send_rounded),
-                                onPressed: _sendMessage,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -147,7 +179,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Column(
             children: [
               Container(
-                color: theme.background.shade700,
+                color: theme.neutral.shade700,
                 child: SafeArea(
                   top: true,
                   left: false,
@@ -159,7 +191,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               Container(
                 height: 55,
                 width: double.infinity,
-                color: theme.background.shade700,
+                color: theme.neutral.shade700,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -188,7 +220,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               margin: EdgeInsets.only(left: 20),
                               child: CircleAvatar(
                                 radius: 20,
-                                backgroundColor: theme.background.shade300,
+                                backgroundColor: theme.neutral.shade700,
                                 child: Text(
                                   chat.chatName[0].toUpperCase(),
                                   style: TextStyle(
@@ -245,7 +277,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
       drawer: SafeArea(
         child: Drawer(
-          backgroundColor: theme.background.shade700,
+          backgroundColor: theme.neutral.shade700,
           child: FutureBuilder(
             future: databaseService.getUsersForChat(widget.chatId),
             builder: (context, asyncSnapshot) {
@@ -254,7 +286,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.only(top: 15),
-                    color: theme.background.shade600,
+                    color: theme.neutral.shade700,
                     height: 55,
                     child: Text(
                       "Nutzer im Chat",

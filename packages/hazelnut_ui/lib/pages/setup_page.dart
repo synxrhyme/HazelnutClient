@@ -122,7 +122,7 @@ class _SetupPage extends ConsumerState<SetupPage> {
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(5),
-                              color: theme.background.shade300,
+                              color: theme.neutral.shade300,
                             ),
                             child: Text("zurück", style: TextStyle(fontFamily: "Space Grotesk", color: Colors.white))
                           ),
@@ -157,7 +157,7 @@ class _SetupPage extends ConsumerState<SetupPage> {
                             padding: EdgeInsets.only(top: 5, right: 10, bottom: 5, left: 10),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(5),
-                              color: canGoNextPage ? theme.background.shade300 : theme.background.shade400,
+                              color: canGoNextPage ? theme.neutral.shade300 : theme.neutral.shade400,
                             ),
                             child: Text("weiter", style: TextStyle(fontFamily: "Space Grotesk", color: canGoNextPage ? Colors.white : Colors.grey.shade500))
                           ),

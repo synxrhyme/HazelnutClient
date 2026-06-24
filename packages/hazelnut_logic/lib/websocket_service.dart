@@ -74,7 +74,6 @@ class WebSocketService {
     if (_socket == null || !_connected || key == null) return;
 
     final encrypted = await cryptoService.encryptAES(key, raw);
-    debugPrint("raw: $raw");
     _socket!.add(jsonEncode(encrypted));
   }
 

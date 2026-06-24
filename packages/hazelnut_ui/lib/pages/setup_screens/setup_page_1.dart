@@ -26,7 +26,7 @@ class _SetupPage1State extends State<SetupPage1> {
     return Stack(
       children: [
         Container(
-          color: theme.background.shade400,
+          color: theme.neutral.shade400,
         ),
         Center(
           child: Text(

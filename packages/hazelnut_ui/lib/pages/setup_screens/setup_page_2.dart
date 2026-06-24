@@ -98,7 +98,7 @@ class _SetupPage2State extends ConsumerState<SetupPage2> {
     final theme = Theme.of(context).extension<CustomColors>()!;
 
     return Container(
-      color: theme.background.shade500,
+      color: theme.neutral.shade500,
       width: double.infinity,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -124,7 +124,7 @@ class _SetupPage2State extends ConsumerState<SetupPage2> {
                     cursorColor: theme.info.shade500,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: theme.background.shade600,
+                      fillColor: theme.neutral.shade600,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide:

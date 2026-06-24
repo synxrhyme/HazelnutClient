@@ -118,7 +118,11 @@ class AuthService {
     final String refreshToken = await secureStorageService.getToken("refreshToken");
 
     if (refreshToken.isEmpty) {
-      webSocketBus.emit("REFRESH_TOKEN_EMPTY", {});
+      webSocketBus.emit("SHOW_SNACKBAR", {
+        "severity": "error",
+        "title": "Refresh-Token nicht gefunden",
+      });
+
       signOut();
       return;
     }
