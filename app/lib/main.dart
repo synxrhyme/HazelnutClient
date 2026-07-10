@@ -1,3 +1,4 @@
+import "package:flutter_native_splash/flutter_native_splash.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:hazelnut/init_service.dart";
 import "package:hazelnut/life_cycle_handler.dart";
@@ -20,7 +21,8 @@ bool firebaseBackgroundInitialized = false;
 late final ProviderContainer container;
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(const _InitWrapper());
 }
 
@@ -42,33 +44,44 @@ class _InitWrapperState extends State<_InitWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      scaffoldMessengerKey: rootScaffoldMessengerKey,
-      navigatorKey:         navigatorKey,
-      navigatorObservers:   [routeObserver],
-      debugShowCheckedModeBanner: false,
-      title: "Hazelnut",
-      theme: lightMode,
-      darkTheme: darkMode,
-      themeMode: ThemeMode.dark,
-      home: FutureBuilder<void>(
-        future: _initFuture,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Scaffold(
-              resizeToAvoidBottomInset: false,
-              body: Center(child: Text('Fehler: ${snapshot.error}')),
-            );
-          }
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const _LoadingScreen();
-          }
-          return UncontrolledProviderScope(
-            container: container,
-            child: MyAppLifecycleHandler(child: const HazelnutApp()),
+    return FutureBuilder<void>(
+      future: _initFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: lightMode,
+            darkTheme: darkMode,
+            themeMode: ThemeMode.system,
+            home: Scaffold(body: Center(child: Text('Fehler: ${snapshot.error}'))),
           );
-        },
-      ),
+        }
+
+        if (snapshot.connectionState != ConnectionState.done) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: lightMode,
+            darkTheme: darkMode,
+            themeMode: ThemeMode.system,
+            home: const _LoadingScreen(),
+          );
+        }
+
+        return UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            scaffoldMessengerKey: rootScaffoldMessengerKey,
+            navigatorKey:         navigatorKey,
+            navigatorObservers:   [routeObserver],
+            debugShowCheckedModeBanner: false,
+            title:     "Hazelnut",
+            theme:     lightMode,
+            darkTheme: darkMode,
+            themeMode: ThemeMode.system,
+            home: MyAppLifecycleHandler(child: const HazelnutApp()),
+          ),
+        );
+      },
     );
   }
 }

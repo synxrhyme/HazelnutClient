@@ -1,9 +1,9 @@
 flutter_native_splash:
-  color: "#ffffff"                             # Light Mode Hintergrund
-  image: assets/icon/icon_splash_light.png
+  color: "#F0F0F0"
+  image: assets/icon/icon.png
 
-  color_dark: "#000000"                        # Dark Mode Hintergrund
-  image_dark: assets/icon/icon_splash_dark.png
+  color_dark: "#0F0F0F"
+  image_dark: assets/icon/icon_dark.png
 
   android_gravity: center
   ios_content_mode: center
@@ -11,11 +11,11 @@ flutter_native_splash:
   fullscreen: true
 
   android_12:
-    color: "#ffffff"                            # Light Mode Hintergrund
-    image: assets/icon/icon_splash_light.png
+    color: "#F0F0F0"
+    image: assets/icon/icon.png
 
-    color_dark: "#000000"                       # Dark Mode Hintergrund
-    image_dark: assets/icon/icon_splash_dark.png
+    color_dark: "#0F0F0F"
+    image_dark: assets/icon/icon_dark.png
 
     fullscreen: true
     android_gravity: center

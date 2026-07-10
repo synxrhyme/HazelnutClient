@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hazelnut_logic/app_dependencies.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
 import 'package:hazelnut_logic/util.dart';
 import 'package:hazelnut_shared/models.dart';
@@ -83,11 +82,7 @@ class _ChatListOrPlaceholderState extends ConsumerState<ChatListOrPlaceholder> {
                     builder: ((context) {
                       return Padding(
                         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                        child: JoinChatModal(
-                          onSend: (msg) async {
-                            await ref.read(appDependenciesProvider).webSocketService.sendMessage(msg);
-                          },
-                        ),
+                        child: JoinChatModal(),
                       );
                     })
                   );
@@ -130,11 +125,7 @@ class _ChatListOrPlaceholderState extends ConsumerState<ChatListOrPlaceholder> {
                       builder: ((context) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                          child: JoinChatModal(
-                            onSend: (msg) async {
-                              await ref.read(appDependenciesProvider).webSocketService.sendMessage(msg);
-                            },
-                          ),
+                          child: JoinChatModal(),
                         );
                       })
                     );

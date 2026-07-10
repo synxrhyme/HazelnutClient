@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hazelnut_logic/app_dependencies.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
 import 'package:hazelnut_shared/navigation.dart';
 import 'package:hazelnut_ui/snackbar_utils.dart';
 import 'package:hazelnut_ui/theme.dart';
 
 class JoinChatModal extends ConsumerStatefulWidget {
-  const JoinChatModal({super.key, required this.onSend});
-  final void Function(String) onSend;
+  const JoinChatModal({super.key});
 
   @override
   ConsumerState<JoinChatModal> createState() => _JoinChatModalState();
@@ -26,7 +26,7 @@ class _JoinChatModalState extends ConsumerState<JoinChatModal> {
   @override
   void initState() {
     super.initState();
-    //Future.microtask(() async => await ref.read(chatProviderProvider).loadChats());
+    ref.read(chatProviderProvider).loadChats();
   }
 
   @override
@@ -187,6 +187,6 @@ class _JoinChatModalState extends ConsumerState<JoinChatModal> {
       };
 
       if (!context.mounted) return;
-      widget.onSend(jsonEncode(request).toString());
+      await ref.read(appDependenciesProvider).webSocketService.sendMessage(jsonEncode(request).toString());
   }
 }
