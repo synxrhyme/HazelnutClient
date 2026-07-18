@@ -52,6 +52,16 @@ class _MainPage3State extends ConsumerState<MainPage3> {
             }),
             child: Text("change"),
           ),
+          Builder(
+            builder: (context) {
+              switch (showing) {
+                case 0: return const Text("Chats");
+                case 1: return const Text("Messages");
+                case 2: return const Text("Users");
+                default: return const SizedBox.shrink();
+              }
+            }
+          ),
           Expanded(
             child: Builder(
               builder: (context) {

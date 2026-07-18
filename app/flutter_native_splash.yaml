@@ -1,23 +1,23 @@
 flutter_native_splash:
   color: "#F0F0F0"
-  image: assets/icon/icon.png
+  image: assets/icon/splash/icon.png
 
   color_dark: "#0F0F0F"
-  image_dark: assets/icon/icon_dark.png
+  image_dark: assets/icon/splash/icon_dark.png
 
   android_gravity: center
   ios_content_mode: center
 
-  fullscreen: true
+  fullscreen: false
 
   android_12:
     color: "#F0F0F0"
-    image: assets/icon/icon.png
+    image: assets/icon/splash/icon.png
 
     color_dark: "#0F0F0F"
-    image_dark: assets/icon/icon_dark.png
+    image_dark: assets/icon/splash/icon_dark.png
 
-    fullscreen: true
+    fullscreen: false
     android_gravity: center
 
   android: true

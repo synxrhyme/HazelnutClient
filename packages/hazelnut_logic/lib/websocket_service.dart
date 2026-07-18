@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:hazelnut_logic/auth_service.dart';
 import 'package:hazelnut_logic/crypto_service.dart';
 import 'package:hazelnut_logic/database_service.dart';
 import 'package:hazelnut_logic/preferences_service.dart';
@@ -229,6 +230,10 @@ class WebSocketService {
         debugPrint("[WebSocket] Auth response: ${data["status"]}");
 
         if (data["status"] == "valid") { _authReady = true; }
+
+        else if (data["status"] == "user_invalid") {
+          webSocketBus.emit("IVCRED_SIGNOUT", {});
+        }
         
         else if (data["status"] == "token_invalid") {
           webSocketBus.emit('REFRESH_TOKEN', {});

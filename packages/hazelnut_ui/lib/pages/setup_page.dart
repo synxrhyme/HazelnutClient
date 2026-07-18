@@ -59,115 +59,117 @@ class _SetupPage extends ConsumerState<SetupPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      body: Container(
-        color: appBarList[_index],
-        child: SafeArea(
-          top: true,
-          left: false,
-          right: false,
-          bottom: true,
-          child: Stack(
-            children: [
-              PageView(
-                physics: NeverScrollableScrollPhysics(),
-                controller: pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    _index = index;
-                    onFirstPage = (index == 0);
-                    onLastPage  = (index == 2);
-          
-                    if (onFirstPage || onLastPage) canGoNextPage = true;
-                  });
-                },
+      backgroundColor: theme.neutral.background,
+      body: SafeArea(
+        top: true,
+        left: false,
+        right: false,
+        bottom: true,
+        child: Stack(
+          children: [
+            PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _index = index;
+                  onFirstPage = (index == 0);
+                  onLastPage  = (index == 2);
+        
+                  if (onFirstPage || onLastPage) canGoNextPage = true;
+                });
+              },
+              children: [
+                SetupPage1(
+                  callback: (value) {
+                    setState(() {
+                      canGoNextPage = value;
+                    });
+                  },
+                ),
+                SetupPage2(
+                  controller: usernameController,
+                  callback: (value, name) {
+                    setState(() {
+                      canGoNextPage = value;
+                    });
+      
+                    username = name;
+                  },
+                  username: username,
+                ),
+                SetupPage3(username: username),
+              ],
+            ),
+        
+            Container(
+              width: double.infinity,
+              alignment: Alignment(0, 0.7),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  SetupPage1(),
-                  SetupPage2(
-                    controller: usernameController,
-                    callback: (value, name) {
-                      setState(() {
-                        canGoNextPage = value;
-                      });
-
-                      username = name;
-                    },
-                    username: username,
-                  ),
-                  SetupPage3(username: username),
-                ],
-              ),
-          
-              Container(
-                width: double.infinity,
-                alignment: Alignment(0, 0.7),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    onFirstPage ?
-              
-                      SizedBox(width: 90)
-              
-                      :
-              
-                      SizedBox(
-                        width: 90,
-                        height: 35,
-                        child: GestureDetector(
-                          onTap: () => {
-                            pageController.previousPage(duration: Duration(milliseconds: 250), curve: Curves.easeOut),
-                          },
-                          child: Container(
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: theme.neutral.shade300,
-                            ),
-                            child: Text("zurück", style: TextStyle(fontFamily: "Space Grotesk", color: Colors.white))
+                  onFirstPage ?
+            
+                    SizedBox(width: 90)
+            
+                    :
+            
+                    SizedBox(
+                      width: 90,
+                      height: 35,
+                      child: GestureDetector(
+                        onTap: () => {
+                          pageController.previousPage(duration: Duration(milliseconds: 250), curve: Curves.easeOut),
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: theme.neutral.shade300,
                           ),
-                        ),
-                      ),  
-              
-                    SmoothPageIndicator(
-                      controller: pageController,
-                      count: 3,
-                      effect: ExpandingDotsEffect(
-                        dotColor:       theme.info.shade700!,
-                        activeDotColor: theme.info.shade600!,
-                      ),  
-                    ),
-              
-                    onLastPage ?
-              
-                      SizedBox(width: 90)
-              
-                      :
-              
-                      SizedBox(
-                        width: 90,
-                        height: 35,
-                        child: GestureDetector(
-                          onTap: canGoNextPage ? () {
-                            if (_index == 2) secureStorage.saveToken("username", username);
-                            pageController.nextPage(duration: Duration(milliseconds: 250), curve: Curves.easeOut);
-                          } : null,
-                          child: Container(
-                            alignment: Alignment.center,
-                            padding: EdgeInsets.only(top: 5, right: 10, bottom: 5, left: 10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: canGoNextPage ? theme.neutral.shade300 : theme.neutral.shade400,
-                            ),
-                            child: Text("weiter", style: TextStyle(fontFamily: "Space Grotesk", color: canGoNextPage ? Colors.white : Colors.grey.shade500))
-                          ),
+                          child: Text("zurück", style: TextStyle(fontFamily: "Space Grotesk", color: Colors.white))
                         ),
                       ),
-                  ],
-                ),
+                    ),  
+            
+                  SmoothPageIndicator(
+                    controller: pageController,
+                    count: 3,
+                    effect: ExpandingDotsEffect(
+                      dotColor:       theme.accent.shade700!,
+                      activeDotColor: theme.accent.shade600!,
+                    ),  
+                  ),
+            
+                  onLastPage ?
+            
+                    SizedBox(width: 90)
+            
+                    :
+            
+                    SizedBox(
+                      width: 90,
+                      height: 35,
+                      child: GestureDetector(
+                        onTap: canGoNextPage ? () {
+                          if (_index == 2) secureStorage.saveToken("username", username);
+                          pageController.nextPage(duration: Duration(milliseconds: 250), curve: Curves.easeOut);
+                        } : null,
+                        child: Container(
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.only(top: 5, right: 10, bottom: 5, left: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: canGoNextPage ? theme.neutral.shade300 : theme.neutral.shade400,
+                          ),
+                          child: Text("weiter", style: TextStyle(fontFamily: "Space Grotesk", color: canGoNextPage ? Colors.white : Colors.grey.shade500))
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

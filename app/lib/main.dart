@@ -1,5 +1,6 @@
 import "package:flutter_native_splash/flutter_native_splash.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import 'package:flutter/services.dart';
 import "package:hazelnut/init_service.dart";
 import "package:hazelnut/life_cycle_handler.dart";
 import "package:hazelnut/route_observer.dart";
@@ -24,6 +25,10 @@ Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(const _InitWrapper());
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  });
 }
 
 // Kein ConsumerStatefulWidget mehr nötig – kein ref gebraucht

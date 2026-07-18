@@ -85,7 +85,7 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                         ),
                         icon: Icon(Icons.tag_rounded, color: theme.info.shade400)
                       ),
-                      cursorColor: Colors.white,
+                      cursorColor: theme.info.shade400,
                       onTapOutside: (event) {
                         chatNameFocusNode.unfocus();
                       },
@@ -115,7 +115,7 @@ class _MainPage2State extends ConsumerState<MainPage2> {
                         ),
                         icon: Icon(Icons.key_rounded, color: theme.info.shade400)
                       ),
-                      cursorColor: Colors.white,
+                      cursorColor: theme.info.shade400,
                       onTapOutside: (event) {
                         chatAuthFocusNode.unfocus();
                       },

@@ -24,14 +24,10 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     final color = getAccentFromString(widget.message.senderName);
 
     return Container(
+      color: Colors.green,
+      height: 50,
       width: double.infinity,
-      margin: EdgeInsets.only(bottom: 5, left: 15, right: 15, top: 5),
-      padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: theme.neutral.shade700,
-      ),
-      child: Row(
+      /*child: Row(
         children: [
           CircleAvatar(
             radius: 18,
@@ -57,7 +53,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                         "${sanitizeRawInput(widget.message.senderName, maxLength: 30, forDisplay: true)}${widget.message.senderId == userId ? " (Du)" : ""}",
+                          "${sanitizeRawInput(widget.message.senderName, maxLength: 30, forDisplay: true)}${widget.message.senderId == userId ? " (Du)" : ""}",
                           style: TextStyle(
                             color: color.withAlpha(200),
                             fontFamily: "Space Grotesk",
@@ -92,7 +88,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             ),
           )
         ],
-      ),
+      ),*/
     );
   }
 }

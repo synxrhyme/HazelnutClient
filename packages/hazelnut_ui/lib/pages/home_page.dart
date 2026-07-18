@@ -71,44 +71,45 @@ class _HomePageState extends ConsumerState<HomePage> {
             ],
           ),
           Align(
-            alignment: AlignmentGeometry.bottomCenter,
-            child: Container(
-              padding: EdgeInsets.only(bottom: 10, left: 20, right: 20),
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: theme.neutral.shade500!)),
-                color: theme.neutral.shade700
-              ),
-              child: BottomNavigationBar(
-                currentIndex: selectedIndex,
-                onTap: onItemTapped,
-                backgroundColor:     Colors.transparent,
-                selectedItemColor:   theme.navbar.selected,
-                unselectedItemColor: theme.navbar.unselected,
-                selectedFontSize: 14,
-                unselectedFontSize: 12,
-                selectedLabelStyle: TextStyle(fontFamily: "IBM Sans", fontWeight: FontWeight.w500),
-                unselectedLabelStyle: TextStyle(fontFamily: "IBM Sans", fontWeight: FontWeight.w400),
-                items: [
-                  BottomNavigationBarItem(
-                    icon: Padding(
-                      padding: EdgeInsets.only(top: 4),
-                      child: Icon(Icons.group, size: 27),
-                    ),
-                    label: 'Chatrooms',
+            alignment: Alignment.bottomCenter,
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: theme.neutral.shade400!)),
+                    color: theme.neutral.shade700,
                   ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.add_rounded, size: 30),
-                    label: 'Erstellen',
+                  child: SizedBox(height: 60, width: double.infinity),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: BottomNavigationBar(
+                    currentIndex: selectedIndex,
+                    onTap: onItemTapped,
+                    backgroundColor: Colors.transparent,
+                    selectedItemColor: theme.navbar.selected,
+                    unselectedItemColor: theme.navbar.unselected,
+                    selectedFontSize: 14,
+                    unselectedFontSize: 12,
+                    selectedLabelStyle: TextStyle(fontFamily: "IBM Sans", fontWeight: FontWeight.w500),
+                    unselectedLabelStyle: TextStyle(fontFamily: "IBM Sans", fontWeight: FontWeight.w400),
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: Padding(padding: EdgeInsets.only(top: 4), child: Icon(Icons.group, size: 27)),
+                        label: 'Chatrooms',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.add_rounded, size: 30),
+                        label: 'Erstellen',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Padding(padding: EdgeInsets.only(top: 5), child: Icon(Icons.settings, size: 26)),
+                        label: 'Einstellungen',
+                      ),
+                    ],
                   ),
-                  BottomNavigationBarItem(
-                    icon: Padding(
-                      padding: EdgeInsets.only(top: 5),
-                      child: Icon(Icons.settings, size: 26),
-                    ),
-                    label: 'Einstellungen',
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           )
         ]

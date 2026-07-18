@@ -93,8 +93,6 @@ class AuthService {
   Future<void> _sendRegistration(BuildContext context, String username) async {
     String fcmToken = await secureStorageService.getToken("fcmToken");
     final safeUsername = sanitizeRawInput(username, maxLength: 30);
-    
-    loadingService.show();
 
     Map<String, dynamic> request = {
       "header": "auth_request",
@@ -106,8 +104,6 @@ class AuthService {
     };
 
     webSocketService.sendRaw(jsonEncode(request));
-
-    loadingService.hide();
   }
 
   Future<void> _refreshAndRetry(Map<String, dynamic>? action) async {    
@@ -146,6 +142,11 @@ class AuthService {
     databaseService.clearAll();
     webSocketService.close(false);
     webSocketBus.emit('USER_SIGNED_OUT', {});
+
+    webSocketBus.emit("SHOW_SNACKBAR", {
+      "severity": "error",
+      "title": "Abgemeldet. Der User ist unbekannt oder nicht mehr gültig.",
+    });
   }
 
   void dispose() {

@@ -97,76 +97,84 @@ class _SetupPage2State extends ConsumerState<SetupPage2> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<CustomColors>()!;
 
-    return Container(
-      color: theme.neutral.shade500,
-      width: double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "Überleg dir einen guten Namen!",
-            style: TextStyle(
-              color: Theme.of(context).primaryColor,
-              height: 1.8,
-              fontSize: 19,
-              fontFamily: "Space Grotesk",
-            ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Überleg dir einen guten Namen!",
+          style: TextStyle(
+            color: Colors.white,
+            height: 1.8,
+            fontSize: 19,
+            fontFamily: "Space Grotesk",
           ),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            margin: const EdgeInsets.only(left: 30, right: 30, top: 30),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    focusNode: _focusNode,
-                    controller: widget.controller,
-                    cursorColor: theme.info.shade500,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: theme.neutral.shade600,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
-                        borderSide:
-                            const BorderSide(width: 0, style: BorderStyle.none),
+        ),
+        Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          margin: const EdgeInsets.only(left: 30, right: 30, top: 30),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  focusNode: _focusNode,
+                  controller: widget.controller,
+                  cursorColor: theme.accent.shade600,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontFamily: "IBM Sans",
+                  ),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: theme.neutral.shade600,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      borderSide: BorderSide(
+                        width: 1,
+                        color: theme.neutral.shade200!, // Farbe im Ruhezustand
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 0),
                     ),
-                    onChanged: onChange,
-                    onTapOutside: (event) {
-                      _focusNode.unfocus();
-                    },
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      borderSide: BorderSide(
+                        width: 1.5,
+                        color: theme.accent.shade600!, // Farbe wenn fokussiert
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                   ),
+                  onChanged: onChange,
+                  onTapOutside: (event) {
+                    _focusNode.unfocus();
+                  },
                 ),
-                // 👇 Nur dieser Teil rebuilt bei Änderung
-                Container(
-                  width: 20,
-                  margin: const EdgeInsets.only(left: 10),
-                  child: ValueListenableBuilder<int>(
-                    valueListenable: remainingSpace,
-                    builder: (_, space, __) {
-                      return ValueListenableBuilder<Color>(
-                        valueListenable: remainingColor,
-                        builder: (_, color, __) {
-                          return Text(
-                            space.toString(),
-                            style: TextStyle(
-                              color: color,
-                              fontFamily: "Space Grotesk",
-                              fontSize: 15,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+              ),
+              Container(
+                width: 20,
+                margin: const EdgeInsets.only(left: 10),
+                child: ValueListenableBuilder<int>(
+                  valueListenable: remainingSpace,
+                  builder: (_, space, __) {
+                    return ValueListenableBuilder<Color>(
+                      valueListenable: remainingColor,
+                      builder: (_, color, __) {
+                        return Text(
+                          space.toString(),
+                          style: TextStyle(
+                            color: color,
+                            fontFamily: "Space Grotesk",
+                            fontSize: 15,
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-              ],
-            ),
-          )
-        ],
-      ),
+              ),
+            ],
+          ),
+        )
+      ],
     );
   }
 }

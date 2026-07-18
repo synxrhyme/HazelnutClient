@@ -86,89 +86,117 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<CustomColors>()!;
+    final FocusNode focusNode = FocusNode();
 
     final List<ChatModel>  chats  = chatProvider.chats;
     final ChatModel        chat   = chats[widget.chatId];
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        toolbarHeight: 60,
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(0),
-          child: Container(
-            height: 1,
-            color: theme.neutral.shade300
-          ),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_rounded, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        backgroundColor: theme.neutral.background,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(child: 
-              Container(
-                margin: EdgeInsets.only(bottom: 10, top: 15),
-                child: Text(
-                  'Vertretungspläne',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 25,
-                    color: theme.accent.shade200,
-                    fontFamily: "Space Grotesk"
-                  ),
+            CircleAvatar(
+              radius: 21,
+              backgroundColor: theme.neutral.shade700,
+              child: Text(
+                chat.chatName[0].toUpperCase(),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontFamily: "Space Grotesk",
+                  fontWeight: FontWeight.w800,
+                  color: getAccentFromString(chat.chatName),
                 ),
+              ),
+            ),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.only(left: 20, right: 20, top: 0, bottom: 0),
+                height: 40,
+                child: Row(
+                  children: [
+                    Center(
+                      child: Text(
+                        chat.chatName,
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: "Space Grotesk",
+                          fontSize: 17,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                padding: EdgeInsets.only(right: 10, left: 10, top: 10, bottom: 10),
+                color: Colors.white,
+                onPressed: () => Scaffold.of(context).openDrawer(),
               ),
             ),
           ],
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          Container(
-            color: theme.neutral.background,
-            child: Column(
+          Expanded(
+            child: Stack(
               children: [
-                Expanded(
-                  child: Stack(
+                ChatList(chatId: widget.chatId),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Row(
                     children: [
-                      ChatList(chatId: widget.chatId),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              margin: EdgeInsets.only(left: 10, right: 10, bottom: 15),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: BoxBorder.all(color: theme.neutral.shade600!, width: 2),
-                                color: Colors.red
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _controller,
-                                      decoration: InputDecoration(
-                                        hintText: "Nachricht schreiben...",
-                                        hintStyle: TextStyle(color: Theme.of(context).primaryColor.withAlpha(120), fontSize: 15),
-                                        border: InputBorder.none,
-                                      ),
-                                      style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 15),
-                                      cursorColor: Theme.of(context).primaryColor,
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.send_rounded),
-                                    onPressed: _sendMessage,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ],
-                              ),
-                            ),
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.only(left: 10, right: 10, bottom: 15, top: 5),
+                          decoration: BoxDecoration(
+                            border: BoxBorder.all(color: theme.neutral.shade600!, width: 2),
+                            color: theme.neutral.shade600,
                           ),
-                        ],
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: TextField(
+                                  controller: _controller,
+                                  focusNode: focusNode,
+                                  decoration: InputDecoration(
+                                    hintText: "Nachricht schreiben...",
+                                    hintStyle: TextStyle(color: Colors.white.withAlpha(120), fontSize: 15),
+                                    border: InputBorder.none,
+                                  ),
+                                  style: TextStyle(color: Colors.white, fontSize: 15),
+                                  cursorColor: Colors.white,
+                                  maxLines: 1,
+                                  onTapOutside: (event) {
+                                    focusNode.unfocus();
+                                  },
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.send_rounded),
+                                onPressed: _sendMessage,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -176,123 +204,29 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ],
             ),
           ),
-          Column(
-            children: [
-              Container(
-                color: theme.neutral.shade700,
-                child: SafeArea(
-                  top: true,
-                  left: false,
-                  right: false,
-                  bottom: true,
-                  child: Container(),
-                ),
-              ),
-              Container(
-                height: 55,
-                width: double.infinity,
-                color: theme.neutral.shade700,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Container(
-                        color: Colors.transparent,
-                        width: 50,
-                        height: 50,
-                        margin: EdgeInsets.only(left: 15),
-                        child: Icon(
-                          Icons.arrow_back_rounded,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: SizedBox(
-                        height: 70,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(left: 20),
-                              child: CircleAvatar(
-                                radius: 20,
-                                backgroundColor: theme.neutral.shade700,
-                                child: Text(
-                                  chat.chatName[0].toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: getAccentFromString(chat.chatName),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.only(left: 20, right: 20, top: 0, bottom: 0),
-                                height: 40,
-                                child: Row(
-                                  children: [
-                                    Center(
-                                      child: Text(
-                                        chat.chatName,
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                          color: Theme.of(context).primaryColor.withAlpha(240),
-                                          fontFamily: "Space Grotesk",
-                                          fontSize: 17,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(right: 10),
-                              child: Builder(
-                                builder: (context) => IconButton(
-                                  icon: const Icon(Icons.menu),
-                                  padding: EdgeInsets.only(right: 10, left: 10, top: 10, bottom: 10),
-                                  color: Theme.of(context).primaryColor,
-                                  onPressed: () => Scaffold.of(context).openDrawer(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
       ),
-
-      drawer: SafeArea(
-        child: Drawer(
-          backgroundColor: theme.neutral.shade700,
+      endDrawerEnableOpenDragGesture: false,
+      drawer: Drawer(
+        backgroundColor: theme.neutral.shade500,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+        child: SafeArea(
+          top: true,
+          bottom: true,
           child: FutureBuilder(
             future: databaseService.getUsersForChat(widget.chatId),
             builder: (context, asyncSnapshot) {
               return Column(
                 children: [
                   Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.only(top: 15),
-                    color: theme.neutral.shade700,
-                    height: 55,
+                    margin: EdgeInsets.only(top: 10),
                     child: Text(
                       "Nutzer im Chat",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Theme.of(context).primaryColor.withAlpha(200),
+                        color: Colors.white,
                         fontFamily: "Space Grotesk",
                         fontSize: 20,
                       ),
@@ -304,19 +238,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.not_accessible_rounded),
+                        Icon(Icons.person_off_rounded, color: Colors.white, size: 40),
+                        SizedBox(height: 15),
                         Text(
                           "Du bist der einzige hier",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Theme.of(context).primaryColor.withAlpha(150),
+                            color: Colors.white,
                             fontFamily: "Space Grotesk",
                             fontSize: 15,
                           ),
                         ),
                       ],
                     )
-
+                
                     :
                     
                     ListView.builder(
@@ -335,7 +270,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                     Text(
                                       asyncSnapshot.data?[index].username ?? "Unbekannt",
                                       style: TextStyle(
-                                        color: Theme.of(context).primaryColor.withAlpha(200),
+                                        color: Colors.white,
                                         fontFamily: "Space Grotesk",
                                         fontSize: 18,
                                       ),
@@ -343,7 +278,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                     Text(
                                       asyncSnapshot.data?[index].online ?? false ? "Online" : "Offline",
                                       style: TextStyle(
-                                        color: Theme.of(context).primaryColor.withAlpha(150),
+                                        color: Colors.white,
                                         fontFamily: "Space Grotesk",
                                         fontSize: 12,
                                       ),
@@ -364,7 +299,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                           text: TextSpan(
                                             text: "Username:  ",
                                             style: TextStyle(
-                                              color: Theme.of(context).primaryColor.withAlpha(200),
+                                              color: Colors.white,
                                               fontFamily: "Space Grotesk",
                                               fontSize: 14,
                                             ),
@@ -372,7 +307,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                               TextSpan(
                                                 text: asyncSnapshot.data?[index].username,
                                                 style: TextStyle(
-                                                  color: Theme.of(context).primaryColor.withAlpha(200),
+                                                  color: Colors.white,
                                                   fontFamily: "Space Grotesk",
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 14,
@@ -387,7 +322,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                           text: TextSpan(
                                             text: "User-ID:  ",
                                             style: TextStyle(
-                                              color: Theme.of(context).primaryColor.withAlpha(200),
+                                              color: Colors.white,
                                               fontFamily: "Space Grotesk",
                                               fontSize: 14,
                                             ),
@@ -395,7 +330,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                               TextSpan(
                                                 text: asyncSnapshot.data?[index].userId,
                                                 style: TextStyle(
-                                                  color: Theme.of(context).primaryColor.withAlpha(200),
+                                                  color: Colors.white,
                                                   fontFamily: "Space Grotesk",
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 14,
@@ -409,7 +344,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                         child: RichText(
                                           text: TextSpan(
                                             style: TextStyle(
-                                              color: Theme.of(context).primaryColor.withAlpha(200),
+                                              color: Colors.white,
                                               fontFamily: "Space Grotesk",
                                               fontSize: 14,
                                             ),
@@ -419,15 +354,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                                 text: " ${joinedDate.day.toString().padLeft(2, '0')}.${joinedDate.month.toString().padLeft(2, '0')}.${joinedDate.year}",
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
                                                 ),
                                               ),
                                               TextSpan(
                                                 text: " um ",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
                                               ),
                                               TextSpan(
                                                 text: "${joinedDate.hour.toString().padLeft(2, '0')}:${joinedDate.minute.toString().padLeft(2, '0')}",
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
                                                 ),
                                               )
                                             ],
@@ -439,7 +379,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                           text: TextSpan(
                                             text: "Online:  ",
                                             style: TextStyle(
-                                              color: Theme.of(context).primaryColor.withAlpha(200),
+                                              color: Colors.white,
                                               fontFamily: "Space Grotesk",
                                               fontSize: 14,
                                             ),
@@ -447,7 +387,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                               TextSpan(
                                                 text: asyncSnapshot.data?[index].online ?? false ? "Ja" : "Nein",
                                                 style: TextStyle(
-                                                  color: Theme.of(context).primaryColor.withAlpha(200),
+                                                  color: Colors.white,
                                                   fontFamily: "Space Grotesk",
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 14,
@@ -465,7 +405,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   height: double.infinity,
                                   child: Icon(
                                     Icons.info_outline_rounded,
-                                    color: Theme.of(context).primaryColor.withAlpha(200),
+                                    color: Colors.white,
                                   )
                                 ),
                               ),
