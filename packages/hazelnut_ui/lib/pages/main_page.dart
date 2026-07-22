@@ -31,13 +31,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     messageProvider = ref.watch(messageProviderProvider);
 
     messageProvider.loadUserId(secureStorage);
-
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
   }
 
   void onItemTapped(int index) {
@@ -59,7 +52,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       backgroundColor: theme.neutral.shade800,
       body: Stack(
         children: [
-          //PremiumBackground(),
+          ColoredBox(
+            color: theme.neutral.shade800!,
+            child: const SizedBox.expand(),
+          ),
           PageView(
             controller: pageController,
             physics: const NeverScrollableScrollPhysics(),
@@ -76,8 +72,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    border: Border(top: BorderSide(color: theme.neutral.shade400!)),
-                    color: theme.neutral.shade700,
+                    border: Border(top: BorderSide(color: theme.neutral.shade300!)),
+                    color: theme.neutral.shade600,
                   ),
                   child: SizedBox(height: 60, width: double.infinity),
                 ),

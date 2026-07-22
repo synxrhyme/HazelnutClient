@@ -46,6 +46,7 @@ dependencies:
   cryptography: ^2.9.0
   characters: ^1.4.0
   flutter_native_splash: ^2.4.8
+  gradient_opacity_mask: ^1.0.0+1
 
 dev_dependencies:
   flutter_test:

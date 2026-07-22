@@ -512,6 +512,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.3.3"
+  gradient_opacity_mask:
+    dependency: "direct main"
+    description:
+      name: gradient_opacity_mask
+      sha256: d82e82f0ee430320b7f51ca3b46569200385de2f803b4f22d941152c6a1fb6e5
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0+1"
   hazelnut_logic:
     dependency: "direct main"
     description:

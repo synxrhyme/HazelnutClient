@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hazelnut_ui/theme.dart';
 
 OverlayEntry? _currentSnackbarEntry;
 Timer? _dismissTimer;
@@ -75,6 +76,8 @@ class _AnimatedSnackbarState extends State<_AnimatedSnackbar>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).extension<CustomColors>()!;
+
     return Positioned(
       top: widget.heightOffset,
       left: 15,
@@ -84,7 +87,7 @@ class _AnimatedSnackbarState extends State<_AnimatedSnackbar>
         child: Material(
           elevation: 10,
           borderRadius: BorderRadius.circular(7),
-          color: const Color(0xFF000000),
+          color: theme.neutral.shade800,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             child: Row(

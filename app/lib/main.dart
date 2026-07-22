@@ -8,7 +8,7 @@ import "package:flutter/material.dart";
 import "package:hazelnut_logic/app_state_provider.dart";
 import "package:hazelnut/event_provider.dart";
 import "package:hazelnut_logic/loading_provider.dart";
-import "package:hazelnut_ui/pages/home_page.dart";
+import "package:hazelnut_ui/pages/main_page.dart";
 import "package:hazelnut_ui/pages/setup_page.dart";
 import "package:hazelnut_ui/theme.dart";
 
@@ -34,6 +34,7 @@ Future<void> main() async {
 // Kein ConsumerStatefulWidget mehr nötig – kein ref gebraucht
 class _InitWrapper extends StatefulWidget {
   const _InitWrapper();
+  
   @override
   State<_InitWrapper> createState() => _InitWrapperState();
 }
@@ -84,6 +85,37 @@ class _InitWrapperState extends State<_InitWrapper> {
             darkTheme: darkMode,
             themeMode: ThemeMode.system,
             home: MyAppLifecycleHandler(child: const HazelnutApp()),
+            builder: (context, child) {
+              return AnnotatedRegion<SystemUiOverlayStyle>(
+                value: const SystemUiOverlayStyle(
+                  systemNavigationBarColor: Colors.transparent,
+                  systemNavigationBarContrastEnforced: false,
+                  systemNavigationBarIconBrightness: Brightness.light,
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness: Brightness.light,
+                ),
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final loadingService = ref.watch(loadingServiceProvider);
+                    return Stack(
+                      children: [
+                        child!,
+                        if (loadingService.isLoading)
+                          Builder(builder: (context) {
+                            final theme = Theme.of(context).extension<CustomColors>()!;
+                            return Container(
+                              color: Colors.black54,
+                              child: Center(
+                                child: CircularProgressIndicator(color: theme.accent.shade500),
+                              ),
+                            );
+                          }),
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
           ),
         );
       },
@@ -97,24 +129,8 @@ class HazelnutApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loadingService = ref.watch(loadingServiceProvider);
     final setupComplete  = ref.watch(setupCompleteProvider);
-
-    return Stack(
-      children: [
-        setupComplete ? const HomePage() : const SetupPage(),
-        if (loadingService.isLoading)
-          Builder(builder: (context) {
-            final theme = Theme.of(context).extension<CustomColors>()!;
-            return Container(
-              color: Colors.black54,
-              child: Center(
-                child: CircularProgressIndicator(color: theme.accent.shade500),
-              ),
-            );
-          }),
-      ],
-    );
+    return setupComplete ? const HomePage() : const SetupPage();
   }
 }
 

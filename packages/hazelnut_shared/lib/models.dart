@@ -37,10 +37,6 @@ class ChatModel {
       "createdTimestamp": createdTimestamp,
     };
   }
-
-  void addUser(UserModel user) {
-    users.add(user);
-  }
 }
 
 class MessageModel {

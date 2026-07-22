@@ -13,6 +13,7 @@ import 'package:hazelnut_logic/websocket_bus.dart';
 import 'package:hazelnut_logic/websocket_service.dart';
 
 class AuthService {
+  String? userId;
   final WebSocketBus webSocketBus;
   final SecureStorageService secureStorageService;
   
@@ -73,7 +74,7 @@ class AuthService {
   Future<void> signIn() async {
     if (_authenticated) return;
 
-    final String userId = await secureStorageService.getToken("userId");
+    userId = await secureStorageService.getToken("userId");
     final String authToken = await secureStorageService.getToken("authToken");
 
     webSocketService.sendRaw(jsonEncode(
@@ -86,8 +87,6 @@ class AuthService {
         }
       }
     ));
-
-    _authenticated = true;
   }
 
   Future<void> _sendRegistration(BuildContext context, String username) async {
@@ -109,6 +108,8 @@ class AuthService {
   Future<void> _refreshAndRetry(Map<String, dynamic>? action) async {    
     webSocketService.authReady = false;
     if (action != null) webSocketService.sendMessage(jsonEncode(action)); // putting it in queue
+
+    _authenticated = false;
 
     final String userId       = await secureStorageService.getToken("userId");
     final String refreshToken = await secureStorageService.getToken("refreshToken");
@@ -132,6 +133,8 @@ class AuthService {
   void appendCredentials() {} // append credentials to message, used in websocket service
 
   Future<void> signOut() async {
+    userId = null;
+
     secureStorageService.deleteToken("username");
     secureStorageService.deleteToken("userId");
     secureStorageService.deleteToken("authToken");
@@ -161,7 +164,7 @@ class AuthService {
 
 final authServiceProvider = Provider<AuthService>((ref) {
   final deps = ref.watch(appDependenciesProvider);
-
+  
   return AuthService(
     webSocketBus:         deps.webSocketBus,
     secureStorageService: deps.secureStorageService,

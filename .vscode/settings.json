@@ -20,12 +20,19 @@
         "statusBar.background": "#541b21",
         "statusBar.foreground": "#e7e7e7",
         "statusBarItem.hoverBackground": "#7b2730",
-        "statusBarItem.remoteBackground": "#541b21",
+        "statusBarItem.remoteBackground": "#2f7927",
         "statusBarItem.remoteForeground": "#e7e7e7",
         "titleBar.activeBackground": "#541b21",
         "titleBar.activeForeground": "#e7e7e7",
         "titleBar.inactiveBackground": "#541b2199",
-        "titleBar.inactiveForeground": "#e7e7e799"
+        "titleBar.inactiveForeground": "#e7e7e799",
+        "activityBarTop.activeBackground": "#7b2730",
+        "activityBarTop.background": "#7b2730",
+        "activityBarTop.foreground": "#e7e7e7",
+        "activityBarTop.inactiveForeground": "#e7e7e799",
+        "commandCenter.foreground": "#e7e7e7",
+        "statusBar.debuggingBackground": "#541b21",
+        "statusBar.debuggingForeground": "#e7e7e7"
     },
     "terminal.integrated.cwd": "C:\\Users\\sasch\\Desktop\\hazelnut\\hazelnut_android\\app"
 }

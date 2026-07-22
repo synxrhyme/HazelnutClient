@@ -45,6 +45,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   cryptography: ^2.9.0
   characters: ^1.4.0
+  gradient_opacity_mask: ^1.0.0+1
 
 dev_dependencies:
   flutter_test:

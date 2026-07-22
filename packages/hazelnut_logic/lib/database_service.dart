@@ -91,7 +91,7 @@ class DatabaseService {
     );
   }
   
-  Future<void> markMessageSent(String uId, int newMessageId) async {
+  Future<void> markMessageSent(int uId, int newMessageId) async {
     await messageDb.update(
       "messages",
       {

@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:hazelnut_logic/auth_service.dart';
 import 'package:hazelnut_logic/crypto_service.dart';
 import 'package:hazelnut_logic/database_service.dart';
 import 'package:hazelnut_logic/preferences_service.dart';
@@ -229,7 +228,10 @@ class WebSocketService {
       case "auth_response": {
         debugPrint("[WebSocket] Auth response: ${data["status"]}");
 
-        if (data["status"] == "valid") { _authReady = true; }
+        if (data["status"] == "valid") {
+          authReady = true;
+          webSocketBus.emit("AUTHENTICATED", {});
+        }
 
         else if (data["status"] == "user_invalid") {
           webSocketBus.emit("IVCRED_SIGNOUT", {});
@@ -290,7 +292,7 @@ class WebSocketService {
     if (_forceClosed) return;
     _connected = false;
     _socket    = null;
-    _authReady = false;
+    authReady = false;
     _transportReady = false;
     _pingTimer?.cancel();
     handshake.reset();
@@ -315,7 +317,7 @@ class WebSocketService {
     _forceClosed = forceClose;
     if (forceClose) _stopReconnectLoop();
     _pingTimer?.cancel();
-    _authReady = false;
+    authReady = false;
     _transportReady = false;
 
     await _socket?.close();

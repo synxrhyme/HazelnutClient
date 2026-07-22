@@ -23,7 +23,7 @@ import 'package:hazelnut_logic/websocket_service.dart';
 import 'package:hazelnut_shared/models.dart';
 import 'package:hazelnut_shared/navigation.dart';
 import 'package:hazelnut_ui/components/notification_icon.dart';
-import 'package:hazelnut_ui/pages/home_page.dart';
+import 'package:hazelnut_ui/pages/main_page.dart';
 import 'package:hazelnut_ui/pages/setup_page.dart';
 import 'package:hazelnut_ui/snackbar_utils.dart';
 import 'package:hazelnut_ui/theme.dart';
@@ -177,17 +177,36 @@ Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
 }
 
 Future<void> initFirebase(SecureStorageService secureStorage) async {
-  await Firebase.initializeApp();
-  
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    // Firebase.initializeApp() ist meist lokal und offline-tolerant, aber sicherheitshalber trotzdem abfangen
+    return;
+  }
+
   final FirebaseMessaging messaging = FirebaseMessaging.instance;
-  await messaging.subscribeToTopic("HazelnutMessenger");
-  
-  final String savedToken = await secureStorage.getToken("fcmToken");
-  if (savedToken.isEmpty) {
-    final String fcmToken = await messaging.getToken() ?? "";
-    if (fcmToken.isNotEmpty) {
-      await secureStorage.saveToken("fcmToken", fcmToken);
+
+  try {
+    await messaging
+        .subscribeToTopic("HazelnutMessenger")
+        .timeout(const Duration(seconds: 5));
+  } catch (e) {
+    // kein Internet o.ä. – Push-Subscription kann später nachgeholt werden
+  }
+
+  try {
+    final String savedToken = await secureStorage.getToken("fcmToken");
+    if (savedToken.isEmpty) {
+      final String fcmToken = await messaging
+          .getToken()
+          .timeout(const Duration(seconds: 5))
+          ?? "";
+      if (fcmToken.isNotEmpty) {
+        await secureStorage.saveToken("fcmToken", fcmToken);
+      }
     }
+  } catch (e) {
+    // Token-Abruf fehlgeschlagen – App läuft trotzdem weiter
   }
 
   if (!firebaseBackgroundInitialized) {
@@ -322,7 +341,7 @@ void onMessage(Map<String, dynamic> data) async {
             heightOffset: 50,
           );
 
-          //authService.signout();
+          container.read(authServiceProvider).signOut();
           return;
         }
 
@@ -403,7 +422,7 @@ void onMessage(Map<String, dynamic> data) async {
             heightOffset: 50,
           );
 
-          //authService.signout();
+          container.read(authServiceProvider).signOut();
           break;
         }
 
@@ -417,7 +436,7 @@ void onMessage(Map<String, dynamic> data) async {
             heightOffset: 50,
           );
 
-          //authService.signout();
+          container.read(authServiceProvider).signOut();
           return;
         }
       }
@@ -478,7 +497,10 @@ void onMessage(Map<String, dynamic> data) async {
           if (users.isNotEmpty) {
             for (final Map<String,dynamic> user_ in users) {
               final UserModel user = UserModel.fromJson(user_);
-              if (user.userId != messageProvider.userId) chatModel.addUser(user);
+              if (user.userId != container.read(authServiceProvider).userId) {
+                databaseService.addUserToChat(chatModel.chatId, user);
+                chatProvider.loadChats();
+              }
             }
 
             chatProvider.loadChats();
@@ -508,7 +530,7 @@ void onMessage(Map<String, dynamic> data) async {
             heightOffset: 50,
           );
 
-          //authService.signout();
+          container.read(authServiceProvider).signOut();
           break;
         }
 
@@ -522,7 +544,7 @@ void onMessage(Map<String, dynamic> data) async {
             heightOffset: 50,
           );
 
-          //authService.signout();
+          container.read(authServiceProvider).signOut();
           break;
         }
 
@@ -547,7 +569,7 @@ void onMessage(Map<String, dynamic> data) async {
             heightOffset: 50,
           );
 
-          //authService.signout();
+          container.read(authServiceProvider).signOut();
           break;
         }
 
@@ -561,7 +583,7 @@ void onMessage(Map<String, dynamic> data) async {
             heightOffset: 50,
           );
 
-          //authService.signout();
+          container.read(authServiceProvider).signOut();
           break;
         }
 
@@ -572,6 +594,7 @@ void onMessage(Map<String, dynamic> data) async {
 
         case 0: {
           await databaseService.markMessageSent(data["body"]["uId"], data["body"]["newMessageId"]);
+          debugPrint("Message sent successfully, updating local database and refreshing message list");
           messageProvider.loadAll();
           break;
         }
@@ -595,7 +618,7 @@ void onMessage(Map<String, dynamic> data) async {
           heightOffset: 50,
         );
 
-        //authService.signout();
+        container.read(authServiceProvider).signOut();
         break;
       }
 

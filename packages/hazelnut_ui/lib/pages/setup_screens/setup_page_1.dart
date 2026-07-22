@@ -56,59 +56,62 @@ class _SetupPage1State extends ConsumerState<SetupPage1> {
     final theme = Theme.of(context).extension<CustomColors>()!;
 
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            "Benachrichtigungen erhalten?",
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: "Space Grotesk",
-              fontSize: 19
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            "Hazelnut informiert dich über neue Nachrichten, auch wenn die App geschlossen ist.",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: "Space Grotesk",
-              fontSize: 15
-            ),
-          ),
-          SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: _onYes,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: active == true
-                      ? theme.success.shade600
-                      : theme.neutral.shade400,
-                  foregroundColor: active == true
-                      ? Colors.white
-                      : Colors.white.withAlpha(160),
-                ),
-                child: Text("Ja"),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "Benachrichtigungen erhalten?",
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: "Space Grotesk",
+                fontSize: 19
               ),
-              ElevatedButton(
-                onPressed: _onNo,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: active == false
-                      ? theme.error.shade600
-                      : theme.neutral.shade400,
-                  foregroundColor: active == false
-                      ? Colors.white
-                      : Colors.white.withAlpha(160),
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Hazelnut informiert dich über neue Nachrichten, auch wenn die App geschlossen ist.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withAlpha(150),
+                fontFamily: "Space Grotesk",
+                fontSize: 15
+              ),
+            ),
+            SizedBox(height: 40),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _onYes,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: active == true
+                        ? theme.success.shade600
+                        : theme.neutral.shade400,
+                    foregroundColor: active == true
+                        ? Colors.white
+                        : Colors.white.withAlpha(160),
+                  ),
+                  child: Text("Ja"),
                 ),
-                child: Text("Nein"),
-              )
-            ],
-          )
-        ],
+                ElevatedButton(
+                  onPressed: _onNo,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: active == false
+                        ? theme.error.shade600
+                        : theme.neutral.shade400,
+                    foregroundColor: active == false
+                        ? Colors.white
+                        : Colors.white.withAlpha(160),
+                  ),
+                  child: Text("Nein"),
+                )
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

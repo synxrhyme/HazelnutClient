@@ -23,19 +23,17 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     final userId = ref.read(messageProviderProvider).userId ?? "";
     final color = getAccentFromString(widget.message.senderName);
 
-    return Container(
-      color: Colors.green,
-      height: 50,
-      width: double.infinity,
-      /*child: Row(
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 3),
+      child: Row(
         children: [
           CircleAvatar(
-            radius: 18,
+            radius: 20,
             backgroundColor: theme.neutral.shade400,
             child: Text(
               widget.message.senderName[0].toUpperCase(),
               style: TextStyle(
-                fontSize: 19,
+                fontSize: 20,
                 color: color,
               ),
             ),
@@ -57,7 +55,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                           style: TextStyle(
                             color: color.withAlpha(200),
                             fontFamily: "Space Grotesk",
-                            fontSize: 13,
+                            fontSize: 14,
                             letterSpacing: 0.8,
                             fontWeight: FontWeight.w600,
                           ),
@@ -67,7 +65,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                           sanitizeRawInput(widget.message.text, maxLength: 65535, forDisplay: true),
                           softWrap: true,
                           style: TextStyle(
-                            color: Theme.of(context).primaryColor.withAlpha(230),
+                            color: Colors.white.withAlpha(220),
                             fontFamily: "Space Grotesk",
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -76,19 +74,19 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                       ],
                     ),
                   ),
-
+      
                   if (widget.message.pending == 1)
                   Icon(
                     Icons.pending_rounded,
-                    color: Colors.grey.shade700,
-                    size: 12,
+                    color: Colors.grey.shade600,
+                    size: 17,
                   ),
                 ],
               ),
             ),
           )
         ],
-      ),*/
+      ),
     );
   }
 }

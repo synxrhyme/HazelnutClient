@@ -80,7 +80,7 @@ class _MainPage3State extends ConsumerState<MainPage3> {
                     itemCount: messageProvider.messagesForChat(0).length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text("${messageProvider.messagesForChat(0)[index].senderName} -- ${messageProvider.messagesForChat(0)[index].uId.toString()}"),
+                        title: Text("${messageProvider.messagesForChat(0)[index].senderName} -- ${messageProvider.messagesForChat(0)[index].uId.toString()} -- pending: ${messageProvider.messagesForChat(0)[index].pending.isOdd ? "true" : "false"}"),
                         subtitle: Text("${messageProvider.messagesForChat(0)[index].text} -- ${messageProvider.messagesForChat(0)[index].sentTimestamp}"),
                       );
                     }

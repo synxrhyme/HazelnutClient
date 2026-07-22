@@ -142,23 +142,23 @@ const _accentDark = CustomShade(
 
 // Neutrals: reines Grau, kein Farbstich
 const _neutralLight = CustomShade(
-  shade200: Color(0xFFFFFFFF), // reine Fläche / Cards
-  shade300: Color(0xFFF4F4F4), // App-Hintergrund
-  shade400: Color(0xFFEAEAEA), // subtile Trenner
-  shade500: Color(0xFFCCCCCC), // Borders
-  shade600: Color(0xFFA0A0A0), // deaktiviert / Hints
-  shade700: Color(0xFF6A6A6A), // Sekundärtext
-  shade800: Color(0xFF1A1A1A), // Primärtext
+  shade200: Color(0xFFFFFFFF), // border 2
+  shade300: Color(0xFFF4F4F4), // border 1
+  shade400: Color(0xFFEAEAEA), // layer 4
+  shade500: Color(0xFFCCCCCC), // layer 3
+  shade600: Color(0xFFA0A0A0), // layer 2
+  shade700: Color(0xFF6A6A6A), // layer 1
+  shade800: Color(0xFF1A1A1A), // background
 );
 
 const _neutralDark = CustomShade(
-  shade200: Color(0xFF2E2E2E), // Cards / erhöhte Flächen
-  shade300: Color(0xFF252525), // leicht erhöht
-  shade400: Color(0xFF1E1E1E), // Surface
-  shade500: Color(0xFF171717), // Hintergrund
-  shade600: Color(0xFF111111), // tiefer Hintergrund
-  shade700: Color(0xFF0A0A0A), // tiefster Grund
-  shade800: Color(0xFF000000),
+  shade200: Color(0xFF424242), // border 3
+  shade300: Color(0xFF3A3A3A), // border 2
+  shade400: Color(0xFF333333), // border 1
+  shade500: Color(0xFF2A2A2A), // layer 3
+  shade600: Color(0xFF212121), // layer 2
+  shade700: Color(0xFF1D1D1D), // layer 1
+  shade800: Color(0xFF151515), // background
 );
 
 // Error: gedämpftes Rot
