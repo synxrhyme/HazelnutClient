@@ -1,9 +1,8 @@
 import "dart:convert";
 import 'package:characters/characters.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter_riverpod/legacy.dart';
-import 'package:hazelnut_logic/message_provider.dart';
-import 'package:hazelnut_logic/app_dependencies.dart';
+import 'package:uuid/data.dart';
+import 'package:uuid/uuid.dart';
 
 String sanitizeRawInput(
   String? input, {
@@ -41,7 +40,6 @@ Color getAccentFromString(String input) {
   return HSLColor.fromAHSL(1, hue, 0.7, 0.6).toColor();
 }
 
-final messageProviderProvider = ChangeNotifierProvider<MessageProvider>((ref) {
-  final deps = ref.watch(appDependenciesProvider);
-  return MessageProvider(deps.secureStorageService, deps.databaseService, deps.webSocketBus);
-});
+String generateUniqueMessageId(DateTime timestamp) {
+  return Uuid().v7(config: V7Options(timestamp.millisecondsSinceEpoch, null)).toString();
+}

@@ -58,8 +58,7 @@ class DatabaseService {
       onCreate: (db, version) {
         return db.execute(
           "CREATE TABLE messages("
-            "uId INTEGER PRIMARY KEY,"
-            "messageId INTEGER,"
+            "messageId TEXT PRIMARY KEY,"
             "pending INTEGER,"
             "chatId INTEGER,"
             "senderId TEXT,"
@@ -91,15 +90,12 @@ class DatabaseService {
     );
   }
   
-  Future<void> markMessageSent(int uId, int newMessageId) async {
+  Future<void> markMessageSent(String messageId) async {
     await messageDb.update(
       "messages",
-      {
-        "messageId": newMessageId,
-        "pending": 0,
-      },
-      where: "uId = ?",
-      whereArgs: [uId]
+      { "pending": 0 },
+      where: "messageId = ?",
+      whereArgs: [messageId]
     );
   }
 
@@ -108,8 +104,6 @@ class DatabaseService {
   }
 
   Future<void> insertMessageIntoDb(MessageModel message) async {
-    final int lastUId = await _preferences.getInt("lastUId") ?? 0;
-    await _preferences.setInt("lastUId", lastUId + 1);
     await messageDb.insert('messages', message.exportJson());
   }
 

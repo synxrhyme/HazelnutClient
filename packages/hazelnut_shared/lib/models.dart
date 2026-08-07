@@ -40,8 +40,7 @@ class ChatModel {
 }
 
 class MessageModel {
-  final int uId;
-  int messageId;
+  String messageId;
   final int chatId;
   final String senderId;
   final String senderName;
@@ -52,7 +51,6 @@ class MessageModel {
   int pending = 1;
 
   MessageModel({
-    required this.uId,
     required this.messageId,
     required this.chatId,
     required this.text,
@@ -65,7 +63,6 @@ class MessageModel {
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
-      uId:               json["uId"],
       messageId:         json["messageId"],
       pending:           json["pending"],
       chatId:            json["chatId"],
@@ -79,7 +76,6 @@ class MessageModel {
 
   Map<String, dynamic> exportJson() {
     return {
-      "uId":               uId,
       "messageId":         messageId,
       "pending":           pending,
       "chatId":            chatId,

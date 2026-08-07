@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hazelnut_logic/auth_service.dart';
 import 'package:hazelnut_logic/chat_provider.dart';
+import 'package:hazelnut_logic/message_provider.dart';
 import 'package:hazelnut_logic/util.dart';
 import 'package:hazelnut_shared/models.dart';
 import 'package:hazelnut_ui/components/notification_icon.dart';

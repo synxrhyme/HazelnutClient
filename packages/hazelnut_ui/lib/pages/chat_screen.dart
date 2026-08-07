@@ -1,4 +1,3 @@
-import 'package:gradient_opacity_mask/gradient_opacity_mask.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,26 +59,51 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (text.isEmpty) return;
 
     final safeMessage = sanitizeRawInput(text, maxLength: 65536);
+    final timestamp = DateTime.now().toUtc();
+
+    final messageData = {
+      "messageId":     generateUniqueMessageId(timestamp),
+      "pending":       1,
+      "chatId":        widget.chatId,
+      "text":          safeMessage.toString(),
+      "senderId":      await secureStorage.getToken("userId"),
+      "senderName":    await secureStorage.getToken("username"),
+      "sentTimestamp": timestamp.toIso8601String(),
+    };
+
+    try {
+      await databaseService.insertMessageIntoDb(MessageModel.fromJson(messageData));
+      messageProvider.loadAll();
+    }
+
+    catch (error) {
+      debugPrint("Error saving message: $error");
+
+      if (error.toString().contains("UNIQUE constraint failed")) {  // messageId not unique
+        String newMessageId = generateUniqueMessageId(timestamp);
+        
+        if (newMessageId == messageData["messageId"]) { // for the MINIMAL chances of 2 collisions
+          debugPrint("New message ID is the same as the old one, generating a new one");
+          newMessageId = generateUniqueMessageId(timestamp);
+        }
+
+        messageData["messageId"] = newMessageId;
+        await databaseService.insertMessageIntoDb(MessageModel.fromJson(messageData));
+        messageProvider.loadAll();
+      }
+      
+      else {
+        // idk
+        return;
+      }
+    }
 
     final message = {
       "header": "new_message",
-      "body": {
-        "uId":           await preferencesService.getInt("lastUId") ?? 0,
-        "pending":       1,
-        "chatId":        widget.chatId,
-        "text":          safeMessage.toString(),
-        "senderId":      await secureStorage.getToken("userId"),
-        "senderName":    await secureStorage.getToken("username"),
-        "sentTimestamp": DateTime.now().toUtc().toIso8601String(),
-      }
+      "body": messageData
     };
 
-    final messageForDb = (message["body"] as Map<String, dynamic>);
-    messageForDb.remove("authToken");
-    messageForDb["messageId"] = await databaseService.getLatestMessageId();
-
     webSocketService.sendMessage(jsonEncode(message));
-    messageProvider.addMessage(MessageModel.fromJson(messageForDb), true);
 
     _controller.clear();
   }

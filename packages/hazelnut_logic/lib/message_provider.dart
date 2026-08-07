@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:hazelnut_logic/app_dependencies.dart';
 import 'package:hazelnut_logic/database_service.dart';
 import 'package:hazelnut_logic/secure_storage_service.dart';
 import 'package:hazelnut_logic/websocket_bus.dart';
@@ -43,16 +45,14 @@ class MessageProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addMessage(MessageModel message, bool update) async {
-    await databaseService.insertMessageIntoDb(message);
-    if (update) loadAll();
-
-    notifyListeners();
-  }
-
   @override
   void dispose() {
     _signOutSub?.cancel();
     super.dispose();
   }
 }
+
+final messageProviderProvider = ChangeNotifierProvider<MessageProvider>((ref) {
+  final deps = ref.watch(appDependenciesProvider);
+  return MessageProvider(deps.secureStorageService, deps.databaseService, deps.webSocketBus);
+});
